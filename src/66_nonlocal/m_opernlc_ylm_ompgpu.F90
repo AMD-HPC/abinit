@@ -641,7 +641,7 @@ subroutine opernlc_ylm_ompgpu(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,c
        do ispinor=1,nspinor
          do ia=1,nincat
            !$OMP PARALLEL DO &
-           !$OMP& PRIVATE(ispinor_index,index_enl,j0lmn,i0lmn,index_enl,jlmn,ilmn,i0lmn,mu,ii)
+           !$OMP& PRIVATE(ispinor_index,j0lmn,index_enl,jlmn,ilmn,i0lmn,mu,ii)
            do jlmn=1,nlmn
              ispinor_index=ispinor+shift
              index_enl=atindx1(iatm+ia)

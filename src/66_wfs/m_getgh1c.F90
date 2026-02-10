@@ -447,7 +447,8 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
      !$OMP TARGET PARALLEL DO &
      !$OMP& MAP(to:gh1c)
      do ipw=1,npw1*my_nspinor*ndat
-       gh1c(:,ipw)=zero
+       gh1c(1,ipw)=zero
+       gh1c(2,ipw)=zero
      end do
 #endif
    end if
@@ -513,7 +514,8 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
 #ifdef HAVE_OPENMP_OFFLOAD
          !$OMP TARGET PARALLEL DO MAP(to:nonlop_out,gvnlx1_)
          do ipw=1,npw1*my_nspinor*ndat
-           gvnlx1_(:,ipw)=gvnlx1_(:,ipw)+nonlop_out(:,ipw)
+           gvnlx1_(1,ipw)=gvnlx1_(1,ipw)+nonlop_out(1,ipw)
+           gvnlx1_(2,ipw)=gvnlx1_(2,ipw)+nonlop_out(2,ipw)
          end do
 #endif
        end if
@@ -624,7 +626,8 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
 #ifdef HAVE_OPENMP_OFFLOAD
          !$OMP TARGET PARALLEL DO MAP(to:gvnlx1_,nonlop_out)
          do ipw=1,npw1*my_nspinor*ndat
-           gvnlx1_(:,ipw)=nonlop_out(:,ipw)
+           gvnlx1_(1,ipw)=nonlop_out(1,ipw)
+           gvnlx1_(2,ipw)=nonlop_out(2,ipw)
          end do
 #endif
        end if
@@ -682,7 +685,8 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
 #ifdef HAVE_OPENMP_OFFLOAD
          !$OMP TARGET PARALLEL DO MAP(to:gvnlx1_,nonlop_out)
          do ipw=1,npw1*my_nspinor*ndat
-           gvnlx1_(:,ipw)=gvnlx1_(:,ipw)+nonlop_out(:,ipw)
+           gvnlx1_(1,ipw)=gvnlx1_(1,ipw)+nonlop_out(1,ipw)
+           gvnlx1_(2,ipw)=gvnlx1_(2,ipw)+nonlop_out(2,ipw)
          end do
 #endif
        end if
@@ -715,7 +719,8 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
 #ifdef HAVE_OPENMP_OFFLOAD
          !$OMP TARGET PARALLEL DO MAP(to:gs1c)
          do ipw=1,npw1*my_nspinor*ndat
-           gs1c(:,ipw)=zero
+           gs1c(1,ipw)=zero
+           gs1c(2,ipw)=zero
          end do
 #endif
        end if
@@ -793,7 +798,8 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
 #ifdef HAVE_OPENMP_OFFLOAD
          !$OMP TARGET PARALLEL DO MAP(to:gvnlx1_,nonlop_out)
          do ipw=1,npw1*my_nspinor*ndat
-           gvnlx1_(:,ipw)=gvnlx1_(:,ipw)+nonlop_out(:,ipw)
+           gvnlx1_(1,ipw)=gvnlx1_(1,ipw)+nonlop_out(1,ipw)
+           gvnlx1_(2,ipw)=gvnlx1_(2,ipw)+nonlop_out(2,ipw)
          end do
 #endif
        end if
@@ -837,7 +843,8 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
 #ifdef HAVE_OPENMP_OFFLOAD
          !$OMP TARGET PARALLEL DO MAP(to:gs1c)
          do ipw=1,npw1*my_nspinor*ndat
-           gs1c(:,ipw)=zero
+           gs1c(1,ipw)=zero
+           gs1c(2,ipw)=zero
          end do
 #endif
        end if
@@ -858,7 +865,8 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
 #ifdef HAVE_OPENMP_OFFLOAD
        !$OMP TARGET PARALLEL DO MAP(to:gvnlx1_)
        do ipw=1,npw1*my_nspinor*ndat
-         gvnlx1_(:,ipw)=zero
+         gvnlx1_(1,ipw)=zero
+         gvnlx1_(2,ipw)=zero
        end do
 #endif
      end if
@@ -873,7 +881,8 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
 #ifdef HAVE_OPENMP_OFFLOAD
        !$OMP TARGET PARALLEL DO MAP(to:gs1c)
        do ipw=1,npw1*my_nspinor*ndat
-         gs1c(:,ipw)=zero
+         gs1c(1,ipw)=zero
+         gs1c(2,ipw)=zero
        end do
 #endif
      end if
@@ -1634,7 +1643,8 @@ subroutine getdc1(band,band_procs,bands_treated_now,cgq,cprjq,dcwavef,dcwaveprj,
 #ifdef HAVE_OPENMP_OFFLOAD
        !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO PRIVATE(ipw) MAP(to:dcwavef,s1cwave0,dcwavef_tmp)
        do ipw=1,npw1*nspinor*ndat
-         dcwavef(1:2,ipw)= scal*(nproc_band*s1cwave0(1:2,ipw)-dcwavef_tmp(1:2,ipw))
+         dcwavef(1,ipw)= scal*(nproc_band*s1cwave0(1,ipw)-dcwavef_tmp(1,ipw))
+         dcwavef(2,ipw)= scal*(nproc_band*s1cwave0(2,ipw)-dcwavef_tmp(2,ipw))
        end do
 #endif
      end if

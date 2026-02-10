@@ -145,8 +145,8 @@ subroutine opernld_ylm_allwf(choice,cplex,cplex_fac,ddkk,&
  real(dp),intent(inout) :: fnlk(3*natom,ndat),strnlk(6,ndat)
 
  ! locals
- integer,parameter :: alpha(6)=(/1,2,3,3,3,2/),beta(6)=(/1,2,3,2,1,1/)
- integer,parameter :: gamma(3,3)=reshape((/1,6,5,6,2,4,5,4,3/),(/3,3/))
+ integer:: alpha(6)=(/1,2,3,3,3,2/),beta(6)=(/1,2,3,2,1,1/)
+ integer:: gamma(3,3)=reshape((/1,6,5,6,2,4,5,4,3/),(/3,3/))
  integer :: force_shift, shift, nattyp_i
  integer :: itypat, ilmn, ia, idat, igrad, ii, nlmn, iend, ibeg, iatm, iashift
  integer :: mua, mub, nu, mu, mua1, mua2, muu, mut, mushift, nushift

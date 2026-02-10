@@ -238,7 +238,7 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg,ndat)
  integer :: iband_cprj,ider,idir,idir1,ier,ii,ind,ipw,ifft,itypat,izero,jband,jbg,jcg,jkg
  integer :: jkpt,my_jsppol,jstwfk,lmn2_size,mgfftf,mpw,n1,n2,n3,n4,n5,n6,ndat_occ
  integer :: n1f,n2f,n3f,n4f,n5f,n6f,natom,nband_k,ndij,nfft,nfftf,nfftotf,nhat12_grdim,nnlout
- integer :: npw,npwj,nspden_fock,nspinor,nkpg,paw_opt,signs,tim_nonlop,gpu_option
+ integer :: npw,npwj,nspden_fock,nspinor,nkpg,paw_opt,signs,tim_nonlop,gpu_option, idx, idx_occ
  integer, save :: ncount=0
  logical :: need_ghc,qeq0
  real(dp),parameter :: weight1=one
@@ -836,11 +836,13 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg,ndat)
            else if(gpu_option==ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
              !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO &
-             !$OMP& MAP(to:gvnlxc,ghc2,occ) PRIVATE(idat_occ,ipw)
+             !$OMP& MAP(to:gvnlxc,ghc2,occ) PRIVATE(idat_occ,ipw,idx,idx_occ)
              do ipw=1,npw
                do idat_occ=1,ndat_occ
-                 ghc2(1:2,ipw+(idat-1)*npw*nspinor)=ghc2(1:2,ipw+(idat-1)*npw*nspinor)&
-    &               -gvnlxc(1:2,ipw+(idat_occ-1)*npw*nspinor)*occ(idat_occ)*wtk
+                 idx=ipw+(idat-1)*npw*nspinor
+                 idx_occ=ipw+(idat_occ-1)*npw*nspinor
+                 ghc2(1,idx)=ghc2(1,idx)-gvnlxc(1,idx_occ)*occ(idat_occ)*wtk
+                 ghc2(2,idx)=ghc2(2,idx)-gvnlxc(2,idx_occ)*occ(idat_occ)*wtk
                end do
              end do ! idat_occ
 #endif
@@ -1866,8 +1868,8 @@ subroutine fock_ACE_getghc(cwavef,ghc,gs_ham,mpi_enreg,ndat,gpu_option)
  type(MPI_type),intent(in) :: mpi_enreg
  type(gs_hamiltonian_type),target,intent(inout) :: gs_ham
 ! Arrays
- real(dp),intent(inout) :: cwavef(:,:)!,ghc(2,gs_ham%npw_k*ndat)
- real(dp),intent(inout) :: ghc(:,:)
+ real(dp),target,intent(inout) :: cwavef(:,:)!,ghc(2,gs_ham%npw_k*ndat)
+ real(dp),target,intent(inout) :: ghc(:,:)
 
 !Local variables-------------------------------
 ! Scalars
@@ -1877,7 +1879,8 @@ subroutine fock_ACE_getghc(cwavef,ghc,gs_ham,mpi_enreg,ndat,gpu_option)
  type(fock_common_type),pointer :: fockcommon
 ! Arrays
  real(dp) :: tsec(2)
- real(dp), allocatable :: mat(:,:,:),ghc1(:,:),vdotr(:),vdoti(:)
+ real(dp), target, allocatable :: mat(:,:,:), ghc1(:,:)
+ real(dp), allocatable :: vdotr(:),vdoti(:)
  real(dp), ABI_CONTIGUOUS pointer :: xi(:,:,:)
 
 ! *************************************************************************

@@ -390,6 +390,13 @@ module m_abi_linalg
 
   end interface
 
+  ! Explicitly make BIND(C) procedures public
+  public :: check_gpu_mem
+  public :: alloc_on_gpu
+  public :: dealloc_on_gpu
+  public :: gpu_allocated_impl
+  public :: gpu_managed_ptr_status
+
 #else
  !dummy routines replace gpu helper routines
  public :: gpu_device_synchronize
