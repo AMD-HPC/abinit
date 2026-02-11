@@ -666,15 +666,18 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg,ndat)
 &       fockcommon%pawtab,gprimd=gs_ham%gprimd,grnhat_12=grnhat_12,qphon=qvec_j,&
 &       xred=gs_ham%xred,atindx=gs_ham%atindx,gpu_option=gpu_option,nattyp=gs_ham%nattyp)
 
-       if(gpu_option==ABI_GPU_DISABLED) then
-         !$OMP PARALLEL DO COLLAPSE(2) &
-         !$OMP& PRIVATE(idat,idat_occ)
-         do idat=1,ndat
-         do idat_occ=1,ndat_occ
-           rhor_munu(1,:,idat_occ,idat)=rhor_munu(1,:,idat_occ,idat)+rho12(1,:,nspinor,idat_occ,idat)
-           rhor_munu(2,:,idat_occ,idat)=rhor_munu(2,:,idat_occ,idat)-rho12(2,:,nspinor,idat_occ,idat)
-         end do ! idat_occ
-         end do ! idat
+      if(gpu_option==ABI_GPU_DISABLED) then
+        !$OMP PARALLEL DO COLLAPSE(2) &
+        !$OMP& PRIVATE(idat,idat_occ,ifft)
+        do idat=1,ndat
+        do idat_occ=1,ndat_occ
+          !$OMP PARALLEL DO PRIVATE(ifft)
+          do ifft=1,nfftf
+            rhor_munu(1,ifft,idat_occ,idat)=rhor_munu(1,ifft,idat_occ,idat)+rho12(1,ifft,nspinor,idat_occ,idat)
+            rhor_munu(2,ifft,idat_occ,idat)=rhor_munu(2,ifft,idat_occ,idat)-rho12(2,ifft,nspinor,idat_occ,idat)
+          end do
+        end do ! idat_occ
+        end do ! idat
        else if(gpu_option==ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
          !$OMP TARGET TEAMS DISTRIBUTE COLLAPSE(2) &
@@ -1605,11 +1608,13 @@ subroutine fock2ACE(cg,cprj,fock,istwfk,kg,kpt,mband,mcg,mcprj,mgfft,mkmem,mpi_e
        ABI_MALLOC(cwaveprj,(0,0))
      end if
 
-     ABI_MALLOC(kg_k,(3,mpw))
+    ABI_MALLOC(kg_k,(3,mpw))
 !$OMP PARALLEL DO
-     do ipw=1,npw_k
-       kg_k(:,ipw)=kg(:,ipw+ikg)
-     end do
+    do ipw=1,npw_k
+      kg_k(1,ipw)=kg(1,ipw+ikg)
+      kg_k(2,ipw)=kg(2,ipw+ikg)
+      kg_k(3,ipw)=kg(3,ipw+ikg)
+    end do
 
      ABI_MALLOC(ylm_k,(npw_k,mpsang*mpsang*psps%useylm))
      ABI_MALLOC(ylmgr_k,(0,0,0))

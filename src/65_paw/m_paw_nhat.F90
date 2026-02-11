@@ -332,7 +332,9 @@ subroutine pawmknhat(compch_fft,cplex,ider,idir,ipert,izero,gprimd,&
            if (cplex==2) ro(2)=pawrhoij(iatom)%rhoijp(iq0+jrhoij,1)
          end if
        end if
-       ro(1:cplex)=pawtab(itypat)%dltij(klmn)*ro(1:cplex)
+       do ii=1,cplex
+         ro(ii)=pawtab(itypat)%dltij(klmn)*ro(ii)
+       end do
 
        if (compute_nhat) then
          if (cplex==1) then
@@ -352,7 +354,8 @@ subroutine pawmknhat(compch_fft,cplex,ider,idir,ipert,izero,gprimd,&
              do mm=-ils,ils
                ilslm=ils*ils+ils+mm+1
                if (pawang%gntselect(ilslm,klm)>0) then
-                 ro_ql(1:2)=ro(1:2)*pawtab(itypat)%qijl(ilslm,klmn)
+                 ro_ql(1)=ro(1)*pawtab(itypat)%qijl(ilslm,klmn)
+                 ro_ql(2)=ro(2)*pawtab(itypat)%qijl(ilslm,klmn)
                  do ic=1,nfgd
                    jc=2*ic-1
                    pawnhat_atm(jc:jc+1)=pawnhat_atm(jc:jc+1)+ro_ql(1:2)*pawfgrtab(iatom)%gylm(ic,ilslm)
@@ -383,7 +386,8 @@ subroutine pawmknhat(compch_fft,cplex,ider,idir,ipert,izero,gprimd,&
              do mm=-ils,ils
                ilslm=ils*ils+ils+mm+1
                if (pawang%gntselect(ilslm,klm)>0) then
-                 ro_ql(1:2)=ro(1:2)*pawtab(itypat)%qijl(ilslm,klmn)
+                 ro_ql(1)=ro(1)*pawtab(itypat)%qijl(ilslm,klmn)
+                 ro_ql(2)=ro(2)*pawtab(itypat)%qijl(ilslm,klmn)
                  do ic=1,nfgd
                    jc=2*ic-1
                    pawgrnhat_atm(jc:jc+1,1)=pawgrnhat_atm(jc:jc+1,1) &
@@ -446,7 +450,8 @@ subroutine pawmknhat(compch_fft,cplex,ider,idir,ipert,izero,gprimd,&
            jc=2*ic-1
            ro_ql(1)= pawfgrtab(iatom)%expiqr(1,ic)
            ro_ql(2)=-pawfgrtab(iatom)%expiqr(2,ic)
-           ro(1:2)=pawnhat_atm(jc:jc+1)
+           ro(1)=pawnhat_atm(jc)
+           ro(2)=pawnhat_atm(jc+1)
            pawnhat_atm(jc  )=ro(1)*ro_ql(1)-ro(2)*ro_ql(2)
            pawnhat_atm(jc+1)=ro(2)*ro_ql(1)+ro(1)*ro_ql(2)
          end do
@@ -463,12 +468,14 @@ subroutine pawmknhat(compch_fft,cplex,ider,idir,ipert,izero,gprimd,&
              ro_ql(1)= pawfgrtab(iatom)%expiqr(1,ic)
              ro_ql(2)=-pawfgrtab(iatom)%expiqr(2,ic)
              do ii=1,3
-               ro(1:2)=pawgrnhat_atm(jc:jc+1,ii)
+               ro(1)=pawgrnhat_atm(jc,ii)
+               ro(2)=pawgrnhat_atm(jc+1,ii)
                pawgrnhat_atm(jc  ,ii)=ro(1)*ro_ql(1)-ro(2)*ro_ql(2)
                pawgrnhat_atm(jc+1,ii)=ro(2)*ro_ql(1)+ro(1)*ro_ql(2)
              end do
 !            -i.q_i * [n^hat(r).exp(-i.q.r)]
-             ro(1:2)=pawnhat_atm(jc:jc+1)
+             ro(1)=pawnhat_atm(jc)
+           ro(2)=pawnhat_atm(jc+1)
              do ii=1,3
                pawgrnhat_atm(jc  ,ii)=pawgrnhat_atm(jc  ,ii)+qphon(ii)*ro(2)
                pawgrnhat_atm(jc+1,ii)=pawgrnhat_atm(jc+1,ii)-qphon(ii)*ro(1)
@@ -1155,7 +1162,8 @@ subroutine pawmknhat_psipsi_ndat(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngff
                  do ic=1,atom_nfgd(ia)
                    iatom=iatm+ia
                    jc=atom_ifftsph(ic,ia)
-                   ro(1:2)=nhat12_atm(1:2,jc,isploop,idat2,idat1,ia)
+                   ro(1)=nhat12_atm(1,jc,isploop,idat2,idat1,ia)
+                   ro(2)=nhat12_atm(2,jc,isploop,idat2,idat1,ia)
                    nhat12_atm(1,jc,isploop,idat2,idat1,ia)=ro(1)*atom_expiqr(1,ic,ia)-ro(2)*atom_expiqr(2,ic,ia)
                    nhat12_atm(2,jc,isploop,idat2,idat1,ia)=ro(2)*atom_expiqr(1,ic,ia)+ro(1)*atom_expiqr(2,ic,ia)
                  end do
@@ -1172,7 +1180,8 @@ subroutine pawmknhat_psipsi_ndat(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngff
                do idat2=1,ndat2
                  do ic=1,atom_nfgd(ia)
                    jc=atom_ifftsph(ic,ia)
-                   ro(1:2)=nhat12_atm(1:2,jc,isploop,idat2,idat1,ia)
+                   ro(1)=nhat12_atm(1,jc,isploop,idat2,idat1,ia)
+                   ro(2)=nhat12_atm(2,jc,isploop,idat2,idat1,ia)
                    nhat12_atm(1,jc,isploop,idat2,idat1,ia)=ro(1)*atom_expiqr(1,ic,ia)-ro(2)*atom_expiqr(2,ic,ia)
                    nhat12_atm(2,jc,isploop,idat2,idat1,ia)=ro(2)*atom_expiqr(1,ic,ia)+ro(1)*atom_expiqr(2,ic,ia)
                  end do
@@ -1650,7 +1659,8 @@ subroutine pawmknhat_psipsi(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngfft,nha
            jc=pawfgrtab(iatom)%ifftsph(ic)
            ro_ql(1)= pawfgrtab(iatom)%expiqr(1,ic)
            ro_ql(2)= pawfgrtab(iatom)%expiqr(2,ic)
-           ro(1:2)=nhat12_atm(1:2,jc,isploop,idat2,idat1)
+           ro(1)=nhat12_atm(1,jc,isploop,idat2,idat1)
+           ro(2)=nhat12_atm(2,jc,isploop,idat2,idat1)
            nhat12_atm(1,jc,isploop,idat2,idat1)=ro(1)*ro_ql(1)-ro(2)*ro_ql(2)
            nhat12_atm(2,jc,isploop,idat2,idat1)=ro(2)*ro_ql(1)+ro(1)*ro_ql(2)
          end do
@@ -2756,8 +2766,8 @@ subroutine pawsushat(atindx,cprj_k,gbound_diel,gylmg_diel,iband1,iband2,ispinor1
 
 !Local variables ---------------------------------------
 !scalars
- integer :: cplex,iatm,iatom,iatom_tot,ibsp1,ibsp2,ierr,il,ilmn,ils,ilslm,ipw
- integer :: itypat,j0lmn,jlmn,klm,klmn,lmax,lmin,mm,my_comm_atom,my_comm_fft,my_natom,tim_fourwf
+integer :: cplex,iatm,iatom,iatom_tot,ibsp1,ibsp2,ierr,ii,il,ilmn,ils,ilslm,ipw
+integer :: itypat,j0lmn,jlmn,klm,klmn,lmax,lmin,mm,my_comm_atom,my_comm_fft,my_natom,tim_fourwf
  real(dp) :: phil1,phil2,sgn,weight_dum,wf1,wf2
  logical :: my_atmtab_allocated,parity,paral_atom
  type(distribfft_type),pointer :: my_distribfft
@@ -2815,7 +2825,9 @@ subroutine pawsushat(atindx,cprj_k,gbound_diel,gylmg_diel,iband1,iband2,ispinor1
          ro(2)=cprj_k(iatm,ibsp1)%cp(2,ilmn)*cprj_k(iatm,ibsp2)%cp(1,jlmn) &
 &         -cprj_k(iatm,ibsp1)%cp(1,ilmn)*cprj_k(iatm,ibsp2)%cp(2,jlmn)
        end if
-       ro(1:cplex)=ro(1:cplex)*pawtab(itypat)%dltij(klmn)
+       do ii=1,cplex
+         ro(ii)=ro(ii)*pawtab(itypat)%dltij(klmn)
+       end do
 
        do ils=lmin,lmax,2
          il=mod(ils,4);parity=(mod(il,2)==0)
@@ -2825,7 +2837,9 @@ subroutine pawsushat(atindx,cprj_k,gbound_diel,gylmg_diel,iband1,iband2,ispinor1
            ilslm=ils*ils+ils+mm+1
            if (pawang%gntselect(ilslm,klm)>0) then
 
-             ro_ql(1:cplex)=pawtab(itypat)%qijl(ilslm,klmn)*ro(1:cplex)
+             do ii=1,cplex
+               ro_ql(ii)=pawtab(itypat)%qijl(ilslm,klmn)*ro(ii)
+             end do
 
 !            Compute: Sum_{ijR} [ cpi* cpj qij^l (-i)^l g_l(g) S_lm(g) ]
 

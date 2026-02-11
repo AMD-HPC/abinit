@@ -562,8 +562,10 @@ subroutine opernld_ylm_allwf(choice,cplex,cplex_fac,ddkk,&
                !$OMP PARALLEL DO COLLAPSE(2) REDUCTION(+:esum,esumi) PRIVATE(ilmn,d2gx)
                do ia=1,nattyp_i
                  do ilmn=1,nlmn
-                   d2gx(1:cplex)=half*(d2gxdt(1:cplex,nd2gxdt*shift + (ia-1)*nlmn*nd2gxdt + (ilmn-1)*nd2gxdt + muu,idat) &
-&                   +d2gxdt(1:cplex,nd2gxdt*shift + (ia-1)*nlmn*nd2gxdt + (ilmn-1)*nd2gxdt + mut,idat))
+                   do ii=1,cplex
+                     d2gx(ii)=half*(d2gxdt(ii,nd2gxdt*shift + (ia-1)*nlmn*nd2gxdt + (ilmn-1)*nd2gxdt + muu,idat) &
+&                     +d2gxdt(ii,nd2gxdt*shift + (ia-1)*nlmn*nd2gxdt + (ilmn-1)*nd2gxdt + mut,idat))
+                   end do
                    esum=esum &
 &                   +dgxdt(1,ndgxdt*shift + (ia-1)*nlmn*ndgxdt + (ilmn-1)*ndgxdt + mua,idat)*dgxdtfac_sij(1,ndgxdt*shift + (ia-1)*nlmn*ndgxdt + (ilmn-1)*ndgxdt + 6+mub,idat) &
 &                   +dgxdt(2,ndgxdt*shift + (ia-1)*nlmn*ndgxdt + (ilmn-1)*ndgxdt + mua,idat)*dgxdtfac_sij(2,ndgxdt*shift + (ia-1)*nlmn*ndgxdt + (ilmn-1)*ndgxdt + 6+mub,idat) &
