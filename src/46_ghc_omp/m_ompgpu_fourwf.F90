@@ -100,8 +100,8 @@ subroutine ompgpu_fourdp(cplex,ngfft,ldx,ldy,ldz,ndat,isign,fofg,fofr)
 !scalars
  integer,intent(in) :: cplex,ngfft(18),ldx,ldy,ldz,ndat,isign
 !arrays
- real(dp),intent(inout) :: fofg(2*ldx*ldy*ldz*ndat)
- real(dp),intent(inout) :: fofr(cplex*ldx*ldy*ldz*ndat)
+ real(dp), target, intent(inout) :: fofg(2*ldx*ldy*ldz*ndat)
+ real(dp), target, intent(inout) :: fofr(cplex*ldx*ldy*ldz*ndat)
 
 !Local variables-------------------------------
 !scalars

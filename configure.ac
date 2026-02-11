@@ -582,6 +582,12 @@ if test "${abi_fc_vendor}" = "cray"; then
   FCLIBS=`echo ${FCLIBS} | tr '"' ' '`
 fi
 
+# Fix incorrect -l prefix on full library paths (e.g., -l/path/to/libname.a -> /path/to/libname.a)
+# This can happen with some compilers like flang/llvm where AC_FC_LIBRARY_LDFLAGS extracts
+# full paths from verbose output and incorrectly prefixes them with -l
+# Match both -l/path and -l /path patterns
+FCLIBS=`echo "${FCLIBS}" | sed 's/-l[[:space:]]*\(\/[^ ]*\.a\)/\1/g'`
+
 # Determine Fortran-C name mangling scheme
 AC_FC_WRAPPERS
 

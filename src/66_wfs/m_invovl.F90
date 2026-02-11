@@ -1481,7 +1481,7 @@ subroutine solve_inner_ompgpu(invovl, ham, cplx, mpi_enreg, proj, ndat, sm1proj,
  integer :: additional_steps_to_take,idat,iproj,icplx
  integer :: Ptsize(3)
 #ifdef HAVE_GPU_HIP
- type(c_ptr) :: sm1proj_amdcopy,PtPsm1proj_amdcopy
+ real(dp), pointer :: sm1proj_amdref(:,:,:),PtPsm1proj_amdref(:,:,:)
 #endif
 
 ! *************************************************************************

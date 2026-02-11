@@ -145,8 +145,8 @@ subroutine opernld_ylm_allwf(choice,cplex,cplex_fac,ddkk,&
  real(dp),intent(inout) :: fnlk(3*natom,ndat),strnlk(6,ndat)
 
  ! locals
- integer,parameter :: alpha(6)=(/1,2,3,3,3,2/),beta(6)=(/1,2,3,2,1,1/)
- integer,parameter :: gamma(3,3)=reshape((/1,6,5,6,2,4,5,4,3/),(/3,3/))
+ integer:: alpha(6)=(/1,2,3,3,3,2/),beta(6)=(/1,2,3,2,1,1/)
+ integer:: gamma(3,3)=reshape((/1,6,5,6,2,4,5,4,3/),(/3,3/))
  integer :: force_shift, shift, nattyp_i
  integer :: itypat, ilmn, ia, idat, igrad, ii, nlmn, iend, ibeg, iatm, iashift
  integer :: mua, mub, nu, mu, mua1, mua2, muu, mut, mushift, nushift
@@ -562,8 +562,10 @@ subroutine opernld_ylm_allwf(choice,cplex,cplex_fac,ddkk,&
                !$OMP PARALLEL DO COLLAPSE(2) REDUCTION(+:esum,esumi) PRIVATE(ilmn,d2gx)
                do ia=1,nattyp_i
                  do ilmn=1,nlmn
-                   d2gx(1:cplex)=half*(d2gxdt(1:cplex,nd2gxdt*shift + (ia-1)*nlmn*nd2gxdt + (ilmn-1)*nd2gxdt + muu,idat) &
-&                   +d2gxdt(1:cplex,nd2gxdt*shift + (ia-1)*nlmn*nd2gxdt + (ilmn-1)*nd2gxdt + mut,idat))
+                   do ii=1,cplex
+                     d2gx(ii)=half*(d2gxdt(ii,nd2gxdt*shift + (ia-1)*nlmn*nd2gxdt + (ilmn-1)*nd2gxdt + muu,idat) &
+&                     +d2gxdt(ii,nd2gxdt*shift + (ia-1)*nlmn*nd2gxdt + (ilmn-1)*nd2gxdt + mut,idat))
+                   end do
                    esum=esum &
 &                   +dgxdt(1,ndgxdt*shift + (ia-1)*nlmn*ndgxdt + (ilmn-1)*ndgxdt + mua,idat)*dgxdtfac_sij(1,ndgxdt*shift + (ia-1)*nlmn*ndgxdt + (ilmn-1)*ndgxdt + 6+mub,idat) &
 &                   +dgxdt(2,ndgxdt*shift + (ia-1)*nlmn*ndgxdt + (ilmn-1)*ndgxdt + mua,idat)*dgxdtfac_sij(2,ndgxdt*shift + (ia-1)*nlmn*ndgxdt + (ilmn-1)*ndgxdt + 6+mub,idat) &

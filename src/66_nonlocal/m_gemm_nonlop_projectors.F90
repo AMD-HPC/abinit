@@ -838,11 +838,13 @@ contains
         atom_projs(:,:,:) = zero
       end if
 #ifdef HAVE_OPENMP_OFFLOAD
-      !$OMP TARGET PARALLEL DO PRIVATE(ipw) MAP(to:atom_projs,ffnl) &
+      !$OMP TARGET PARALLEL DO COLLAPSE(2) PRIVATE(ipw,ilmn) MAP(to:atom_projs,ffnl) &
       !$OMP& IF(gpu_option==ABI_GPU_OPENMP)
 #endif
-      do ipw=1, npw
-        atom_projs(1,ipw, 1:nlmn_o) = wt * ffnl(ipw, 1, 1:nlmn_o, itypat)
+      do ilmn=1, nlmn_o
+        do ipw=1, npw
+          atom_projs(1,ipw, ilmn) = wt * ffnl(ipw, 1, ilmn, itypat)
+        end do
       end do
 
       ! multiply by (-i)^l
@@ -911,7 +913,8 @@ contains
           !$OMP& PRIVATE(ipw,ilmn) MAP(to:projs,atom_projs)
           do ilmn=1,nlmn-(lmn_beg-1)
             do ipw=1,npw
-              projs(:, ipw, shift+ilmn) = atom_projs(:, ipw, ilmn+(lmn_beg-1))
+              projs(1, ipw, shift+ilmn) = atom_projs(1, ipw, ilmn+(lmn_beg-1))
+              projs(2, ipw, shift+ilmn) = atom_projs(2, ipw, ilmn+(lmn_beg-1))
             end do
           end do
         else ! istwf_k>1
@@ -1000,8 +1003,8 @@ contains
   real(dp), intent(in), target :: kpg(npw,nkpg)
 
   logical :: map_ffnl,map_ph3d,is_last_rank
-  integer,parameter :: alpha(6)=(/1,2,3,3,3,2/),beta(6)=(/1,2,3,2,1,1/)
-  integer,parameter :: gamma(3,3)=reshape((/1,6,5,6,2,4,5,4,3/),(/3,3/))
+  integer:: alpha(6)=(/1,2,3,3,3,2/),beta(6)=(/1,2,3,2,1,1/)
+  integer:: gamma(3,3)=reshape((/1,6,5,6,2,4,5,4,3/),(/3,3/))
   integer :: ndprojs, nd2projs
   integer :: il, ipw, ik, idir, idir1, idir2, jdir1, jdir2, kdir1, kdir2, ldir1, ldir2, ldir3, ldir4, ffnl_dir
   integer :: itypat, ilmn, nlmn, ia, iaph3d, igrad, shift, shift_grad, shift_grad2
@@ -1156,45 +1159,63 @@ contains
       end if
       if (signs==1 .and. (choice==3 .or. choice==23 .or. choice==54 .or. choice==55 .or. choice==6)) then
 #ifdef HAVE_OPENMP_OFFLOAD
-        !$OMP TARGET PARALLEL DO PRIVATE(ipw) MAP(to:atom_dprojs,ffnl) &
+        !$OMP TARGET PARALLEL DO COLLAPSE(3) PRIVATE(ipw,idir,ilmn) MAP(to:atom_dprojs,ffnl) &
         !$OMP& IF(gpu_option==ABI_GPU_OPENMP)
 #endif
-        do ipw=1, npw
-          atom_dprojs(1,ipw, 1:ndprojs, 1:nlmn_o) = wt * ffnl(ipw, 2:ndprojs+1, 1:nlmn_o, itypat)
+        do ilmn=1, nlmn_o
+          do idir=1, ndprojs
+            do ipw=1, npw
+              atom_dprojs(1,ipw, idir, ilmn) = wt * ffnl(ipw, 1+idir, ilmn, itypat)
+            end do
+          end do
         end do
       end if
       if (signs==2 .and. (choice==3 .or. choice==5 .or. choice==51)) then
 #ifdef HAVE_OPENMP_OFFLOAD
-        !$OMP TARGET PARALLEL DO PRIVATE(ipw) MAP(to:atom_dprojs,ffnl) &
+        !$OMP TARGET PARALLEL DO COLLAPSE(2) PRIVATE(ipw,ilmn) MAP(to:atom_dprojs,ffnl) &
         !$OMP& IF(gpu_option==ABI_GPU_OPENMP)
 #endif
-        do ipw=1, npw
-          atom_dprojs(1,ipw, 1, 1:nlmn_o) = wt * ffnl(ipw, 1+ffnl_dir, 1:nlmn_o, itypat)
+        do ilmn=1, nlmn_o
+          do ipw=1, npw
+            atom_dprojs(1,ipw, 1, ilmn) = wt * ffnl(ipw, 1+ffnl_dir, ilmn, itypat)
+          end do
         end do
       end if
       if(signs==1 .and. choice==54) then
 #ifdef HAVE_OPENMP_OFFLOAD
-        !$OMP TARGET PARALLEL DO PRIVATE(ipw) MAP(to:atom_d2projs,ffnl) &
+        !$OMP TARGET PARALLEL DO COLLAPSE(3) PRIVATE(ipw,idir,ilmn) MAP(to:atom_d2projs,ffnl) &
         !$OMP& IF(gpu_option==ABI_GPU_OPENMP)
 #endif
-        do ipw=1, npw
-          atom_d2projs(1,ipw, 1:nd2projs, 1:nlmn_o) = wt * ffnl(ipw, 2:nd2projs+1, 1:nlmn_o, itypat)
+        do ilmn=1, nlmn_o
+          do idir=1, nd2projs
+            do ipw=1, npw
+              atom_d2projs(1,ipw, idir, ilmn) = wt * ffnl(ipw, 1+idir, ilmn, itypat)
+            end do
+          end do
         end do
       else if(signs==1 .and. choice==55) then
 #ifdef HAVE_OPENMP_OFFLOAD
-        !$OMP TARGET PARALLEL DO PRIVATE(ipw) MAP(to:atom_d2projs,ffnl) &
+        !$OMP TARGET PARALLEL DO COLLAPSE(3) PRIVATE(ipw,idir,ilmn) MAP(to:atom_d2projs,ffnl) &
         !$OMP& IF(gpu_option==ABI_GPU_OPENMP)
 #endif
-        do ipw=1, npw
-          atom_d2projs(1,ipw, 1:nd2projs, 1:nlmn_o) = wt * ffnl(ipw, 5:nd2projs+4, 1:nlmn_o, itypat)
+        do ilmn=1, nlmn_o
+          do idir=1, nd2projs
+            do ipw=1, npw
+              atom_d2projs(1,ipw, idir, ilmn) = wt * ffnl(ipw, 4+idir, ilmn, itypat)
+            end do
+          end do
         end do
       else if(signs==1 .and. choice==6) then
 #ifdef HAVE_OPENMP_OFFLOAD
-        !$OMP TARGET PARALLEL DO PRIVATE(ipw) MAP(to:atom_d2projs,ffnl) &
+        !$OMP TARGET PARALLEL DO COLLAPSE(3) PRIVATE(ipw,idir,ilmn) MAP(to:atom_d2projs,ffnl) &
         !$OMP& IF(gpu_option==ABI_GPU_OPENMP)
 #endif
-        do ipw=1, npw
-          atom_d2projs(1,ipw, 1:10, 1:nlmn_o) = wt * ffnl(ipw, 1:10, 1:nlmn_o, itypat)
+        do ilmn=1, nlmn_o
+          do idir=1, 10
+            do ipw=1, npw
+              atom_d2projs(1,ipw, idir, ilmn) = wt * ffnl(ipw, idir, ilmn, itypat)
+            end do
+          end do
         end do
       end if
 
