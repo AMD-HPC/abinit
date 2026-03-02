@@ -768,7 +768,7 @@ subroutine gpu_set_to_zero(array, sizea)
  integer(c_size_t)  :: i
 
 #if defined HAVE_GPU_CUDA
- !$OMP TARGET DATA USE_DEVICE_PTR(array)
+ !$OMP TARGET DATA USE_DEVICE_ADDR(array)
  call gpu_memset(c_loc(array), 0, sizea*dp)
  !$OMP END TARGET DATA
 #elif defined HAVE_GPU_HIP
@@ -813,7 +813,7 @@ subroutine gpu_copy(dest, src, sizea)
  integer(c_size_t)  :: i
 
 #if defined HAVE_GPU_CUDA
- !$OMP TARGET DATA USE_DEVICE_PTR(dest,src)
+ !$OMP TARGET DATA USE_DEVICE_ADDR(dest,src)
  call copy_gpu_to_gpu(c_loc(dest), c_loc(src), sizea*dp)
  !$OMP END TARGET DATA
 #elif defined HAVE_GPU_HIP
@@ -924,7 +924,7 @@ subroutine abi_gpu_xgemm_d(cplx,transa,transb,m,n,k,alpha,a,lda,b,ldb,beta,c,ldc
         c_loc(c),ldc)
   else if(abi_linalg_gpu_mode == ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
-    !$OMP TARGET DATA USE_DEVICE_PTR(a,b,c)
+    !$OMP TARGET DATA USE_DEVICE_ADDR(a,b,c)
     call abi_gpu_xgemm_cptr(cplx,transa,transb,m,n,k,alpha,&
       c_loc(a),lda,&
       c_loc(b),ldb,&
@@ -962,7 +962,7 @@ subroutine abi_gpu_xgemm_z(cplx,transa,transb,m,n,k,alpha,a,lda,b,ldb,beta,c,ldc
         c_loc(c),ldc)
   else if(abi_linalg_gpu_mode == ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
-    !$OMP TARGET DATA USE_DEVICE_PTR(a,b,c)
+    !$OMP TARGET DATA USE_DEVICE_ADDR(a,b,c)
     call abi_gpu_xgemm_cptr(cplx,transa,transb,m,n,k,alpha,&
       c_loc(a),lda,&
       c_loc(b),ldb,&
@@ -1000,7 +1000,7 @@ subroutine abi_gpu_xgemm_2d(cplx,transa,transb,m,n,k,alpha,a,lda,b,ldb,beta,c,ld
         c_loc(c),ldc)
   else if(abi_linalg_gpu_mode == ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
-    !$OMP TARGET DATA USE_DEVICE_PTR(a,b,c)
+    !$OMP TARGET DATA USE_DEVICE_ADDR(a,b,c)
     call abi_gpu_xgemm_cptr(cplx,transa,transb,m,n,k,alpha,&
       c_loc(a),lda,&
       c_loc(b),ldb,&
@@ -1038,7 +1038,7 @@ subroutine abi_gpu_xgemm_2z(cplx,transa,transb,m,n,k,alpha,a,lda,b,ldb,beta,c,ld
         c_loc(c),ldc)
   else if(abi_linalg_gpu_mode == ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
-    !$OMP TARGET DATA USE_DEVICE_PTR(a,b,c)
+    !$OMP TARGET DATA USE_DEVICE_ADDR(a,b,c)
     call abi_gpu_xgemm_cptr(cplx,transa,transb,m,n,k,alpha,&
       c_loc(a),lda,&
       c_loc(b),ldb,&
@@ -1154,7 +1154,7 @@ subroutine abi_gpu_xgemm_strided_d(cplx,transa,transb,m,n,k,alpha,a,lda,strideA,
         c_loc(c),ldc,strideC,batchCount)
   else if(abi_linalg_gpu_mode == ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
-    !$OMP TARGET DATA USE_DEVICE_PTR(a,b,c)
+    !$OMP TARGET DATA USE_DEVICE_ADDR(a,b,c)
     call abi_gpu_xgemm_strided_cptr(cplx,transa,transb,m,n,k,alpha,&
         c_loc(a),lda,strideA,&
         c_loc(b),ldb,strideB,&
@@ -1193,7 +1193,7 @@ subroutine abi_gpu_xgemm_strided_z(cplx,transa,transb,m,n,k,alpha,a,lda,strideA,
         c_loc(c),ldc,strideC,batchCount)
   else if(abi_linalg_gpu_mode == ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
-    !$OMP TARGET DATA USE_DEVICE_PTR(a,b,c)
+    !$OMP TARGET DATA USE_DEVICE_ADDR(a,b,c)
     call abi_gpu_xgemm_strided_cptr(cplx,transa,transb,m,n,k,alpha,&
       c_loc(a),lda,strideA,&
       c_loc(b),ldb,strideB,&
@@ -1232,7 +1232,7 @@ subroutine abi_gpu_xgemm_strided_2d(cplx,transa,transb,m,n,k,alpha,a,lda,strideA
         c_loc(c),ldc,strideC,batchCount)
   else if(abi_linalg_gpu_mode == ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
-    !$OMP TARGET DATA USE_DEVICE_PTR(a,b,c)
+    !$OMP TARGET DATA USE_DEVICE_ADDR(a,b,c)
     call abi_gpu_xgemm_strided_cptr(cplx,transa,transb,m,n,k,alpha,&
       c_loc(a),lda,strideA,&
       c_loc(b),ldb,strideB,&
@@ -1271,7 +1271,7 @@ subroutine abi_gpu_xgemm_strided_2z(cplx,transa,transb,m,n,k,alpha,a,lda,strideA
         c_loc(c),ldc,strideC,batchCount)
   else if(abi_linalg_gpu_mode == ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
-    !$OMP TARGET DATA USE_DEVICE_PTR(a,b,c)
+    !$OMP TARGET DATA USE_DEVICE_ADDR(a,b,c)
     call abi_gpu_xgemm_strided_cptr(cplx,transa,transb,m,n,k,alpha,&
       c_loc(a),lda,strideA,&
       c_loc(b),ldb,strideB,&
@@ -1385,7 +1385,7 @@ subroutine abi_gpu_xsymm_d(cplx,side,uplo,m,n,alpha,a,lda,b,ldb,beta,c,ldc)
         c_loc(c),ldc)
   else if(abi_linalg_gpu_mode == ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
-    !$OMP TARGET DATA USE_DEVICE_PTR(a,b,c)
+    !$OMP TARGET DATA USE_DEVICE_ADDR(a,b,c)
     call abi_gpu_xsymm_cptr(cplx,side,uplo,m,n,alpha,&
       c_loc(a),lda,&
       c_loc(b),ldb,&
@@ -1423,7 +1423,7 @@ subroutine abi_gpu_xsymm_z(cplx,side,uplo,m,n,alpha,a,lda,b,ldb,beta,c,ldc)
         c_loc(c),ldc)
   else if(abi_linalg_gpu_mode == ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
-    !$OMP TARGET DATA USE_DEVICE_PTR(a,b,c)
+    !$OMP TARGET DATA USE_DEVICE_ADDR(a,b,c)
     call abi_gpu_xsymm_cptr(cplx,side,uplo,m,n,alpha,&
       c_loc(a),lda,&
       c_loc(b),ldb,&
@@ -1461,7 +1461,7 @@ subroutine abi_gpu_xsymm_2d(cplx,side,uplo,m,n,alpha,a,lda,b,ldb,beta,c,ldc)
         c_loc(c),ldc)
   else if(abi_linalg_gpu_mode == ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
-    !$OMP TARGET DATA USE_DEVICE_PTR(a,b,c)
+    !$OMP TARGET DATA USE_DEVICE_ADDR(a,b,c)
     call abi_gpu_xsymm_cptr(cplx,side,uplo,m,n,alpha,&
       c_loc(a),lda,&
       c_loc(b),ldb,&
@@ -1499,7 +1499,7 @@ subroutine abi_gpu_xsymm_2z(cplx,side,uplo,m,n,alpha,a,lda,b,ldb,beta,c,ldc)
         c_loc(c),ldc)
   else if(abi_linalg_gpu_mode == ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
-    !$OMP TARGET DATA USE_DEVICE_PTR(a,b,c)
+    !$OMP TARGET DATA USE_DEVICE_ADDR(a,b,c)
     call abi_gpu_xsymm_cptr(cplx,side,uplo,m,n,alpha,&
       c_loc(a),lda,&
       c_loc(b),ldb,&
@@ -1612,7 +1612,7 @@ subroutine abi_gpu_zhemm_d(side,uplo,m,n,alpha,a,lda,b,ldb,beta,c,ldc)
         c_loc(c),ldc)
   else if(abi_linalg_gpu_mode == ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
-    !$OMP TARGET DATA USE_DEVICE_PTR(a,b,c)
+    !$OMP TARGET DATA USE_DEVICE_ADDR(a,b,c)
     call abi_gpu_zhemm_cptr(side,uplo,m,n,alpha,&
       c_loc(a),lda,&
       c_loc(b),ldb,&
@@ -1650,7 +1650,7 @@ subroutine abi_gpu_zhemm_z(side,uplo,m,n,alpha,a,lda,b,ldb,beta,c,ldc)
         c_loc(c),ldc)
   else if(abi_linalg_gpu_mode == ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
-    !$OMP TARGET DATA USE_DEVICE_PTR(a,b,c)
+    !$OMP TARGET DATA USE_DEVICE_ADDR(a,b,c)
     call abi_gpu_zhemm_cptr(side,uplo,m,n,alpha,&
       c_loc(a),lda,&
       c_loc(b),ldb,&
@@ -1688,7 +1688,7 @@ subroutine abi_gpu_zhemm_2d(side,uplo,m,n,alpha,a,lda,b,ldb,beta,c,ldc)
         c_loc(c),ldc)
   else if(abi_linalg_gpu_mode == ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
-    !$OMP TARGET DATA USE_DEVICE_PTR(a,b,c)
+    !$OMP TARGET DATA USE_DEVICE_ADDR(a,b,c)
     call abi_gpu_zhemm_cptr(side,uplo,m,n,alpha,&
       c_loc(a),lda,&
       c_loc(b),ldb,&
@@ -1726,7 +1726,7 @@ subroutine abi_gpu_zhemm_2z(side,uplo,m,n,alpha,a,lda,b,ldb,beta,c,ldc)
         c_loc(c),ldc)
   else if(abi_linalg_gpu_mode == ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
-    !$OMP TARGET DATA USE_DEVICE_PTR(a,b,c)
+    !$OMP TARGET DATA USE_DEVICE_ADDR(a,b,c)
     call abi_gpu_zhemm_cptr(side,uplo,m,n,alpha,&
       c_loc(a),lda,&
       c_loc(b),ldb,&
@@ -1815,7 +1815,7 @@ subroutine abi_gpu_xscal_d(cplx, size, alpha, x, incrx)
    call abi_gpu_xscal_cptr(cplx, size, alpha, c_loc(x), incrx)
  else if(abi_linalg_gpu_mode == ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
-   !$OMP TARGET DATA USE_DEVICE_PTR(x)
+   !$OMP TARGET DATA USE_DEVICE_ADDR(x)
    call abi_gpu_xscal_cptr(cplx, size, alpha, c_loc(x), incrx)
    !$OMP END TARGET DATA
 #endif
@@ -1845,7 +1845,7 @@ subroutine abi_gpu_xscal_z(cplx, size, alpha, x, incrx)
    call abi_gpu_xscal_cptr(cplx, size, alpha, c_loc(x), incrx)
  else if(abi_linalg_gpu_mode == ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
-   !$OMP TARGET DATA USE_DEVICE_PTR(x)
+   !$OMP TARGET DATA USE_DEVICE_ADDR(x)
    call abi_gpu_xscal_cptr(cplx, size, alpha, c_loc(x), incrx)
    !$OMP END TARGET DATA
 #endif
@@ -1875,7 +1875,7 @@ subroutine abi_gpu_xscal_2d(cplx, size, alpha, x, incrx)
    call abi_gpu_xscal_cptr(cplx, size, alpha, c_loc(x), incrx)
  else if(abi_linalg_gpu_mode == ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
-   !$OMP TARGET DATA USE_DEVICE_PTR(x)
+   !$OMP TARGET DATA USE_DEVICE_ADDR(x)
    call abi_gpu_xscal_cptr(cplx, size, alpha, c_loc(x), incrx)
    !$OMP END TARGET DATA
 #endif
@@ -1905,7 +1905,7 @@ subroutine abi_gpu_xscal_2z(cplx, size, alpha, x, incrx)
    call abi_gpu_xscal_cptr(cplx, size, alpha, c_loc(x), incrx)
  else if(abi_linalg_gpu_mode == ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
-   !$OMP TARGET DATA USE_DEVICE_PTR(x)
+   !$OMP TARGET DATA USE_DEVICE_ADDR(x)
    call abi_gpu_xscal_cptr(cplx, size, alpha, c_loc(x), incrx)
    !$OMP END TARGET DATA
 #endif
@@ -1997,7 +1997,7 @@ subroutine abi_gpu_xaxpy_d(cplx, size, alpha, x, incrx, y, incry)
     call abi_gpu_xaxpy_cptr(cplx, size, alpha, c_loc(x), incrx, c_loc(y), incry)
   else if(abi_linalg_gpu_mode == ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
-    !$OMP TARGET DATA USE_DEVICE_PTR(x,y)
+    !$OMP TARGET DATA USE_DEVICE_ADDR(x,y)
     call abi_gpu_xaxpy_cptr(cplx, size, alpha, c_loc(x), incrx, c_loc(y), incry)
     !$OMP END TARGET DATA
 #endif
@@ -2029,7 +2029,7 @@ subroutine abi_gpu_xaxpy_z(cplx, size, alpha, x, incrx, y, incry)
     call abi_gpu_xaxpy_cptr(cplx, size, alpha, c_loc(x), incrx, c_loc(y), incry)
   else if(abi_linalg_gpu_mode == ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
-    !$OMP TARGET DATA USE_DEVICE_PTR(x,y)
+    !$OMP TARGET DATA USE_DEVICE_ADDR(x,y)
     call abi_gpu_xaxpy_cptr(cplx, size, alpha, c_loc(x), incrx, c_loc(y), incry)
     !$OMP END TARGET DATA
 #endif
@@ -2061,7 +2061,7 @@ subroutine abi_gpu_xaxpy_2d(cplx, size, alpha, x, incrx, y, incry)
     call abi_gpu_xaxpy_cptr(cplx, size, alpha, c_loc(x), incrx, c_loc(y), incry)
   else if(abi_linalg_gpu_mode == ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
-    !$OMP TARGET DATA USE_DEVICE_PTR(x,y)
+    !$OMP TARGET DATA USE_DEVICE_ADDR(x,y)
     call abi_gpu_xaxpy_cptr(cplx, size, alpha, c_loc(x), incrx, c_loc(y), incry)
     !$OMP END TARGET DATA
 #endif
@@ -2093,7 +2093,7 @@ subroutine abi_gpu_xaxpy_2z(cplx, size, alpha, x, incrx, y, incry)
     call abi_gpu_xaxpy_cptr(cplx, size, alpha, c_loc(x), incrx, c_loc(y), incry)
   else if(abi_linalg_gpu_mode == ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
-    !$OMP TARGET DATA USE_DEVICE_PTR(x,y)
+    !$OMP TARGET DATA USE_DEVICE_ADDR(x,y)
     call abi_gpu_xaxpy_cptr(cplx, size, alpha, c_loc(x), incrx, c_loc(y), incry)
     !$OMP END TARGET DATA
 #endif
@@ -2181,7 +2181,7 @@ subroutine abi_gpu_xcopy_d(cplx, size, x, incrx, y, incry)
     call abi_gpu_xcopy_cptr(cplx, size, c_loc(x), incrx, c_loc(y), incry)
   else if(abi_linalg_gpu_mode == ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
-    !$OMP TARGET DATA USE_DEVICE_PTR(x,y)
+    !$OMP TARGET DATA USE_DEVICE_ADDR(x,y)
     call abi_gpu_xcopy_cptr(cplx, size, c_loc(x), incrx, c_loc(y), incry)
     !$OMP END TARGET DATA
 #endif
@@ -2212,7 +2212,7 @@ subroutine abi_gpu_xcopy_z(cplx, size, x, incrx, y, incry)
     call abi_gpu_xcopy_cptr(cplx, size, c_loc(x), incrx, c_loc(y), incry)
   else if(abi_linalg_gpu_mode == ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
-    !$OMP TARGET DATA USE_DEVICE_PTR(x,y)
+    !$OMP TARGET DATA USE_DEVICE_ADDR(x,y)
     call abi_gpu_xcopy_cptr(cplx, size, c_loc(x), incrx, c_loc(y), incry)
     !$OMP END TARGET DATA
 #endif
@@ -2243,7 +2243,7 @@ subroutine abi_gpu_xcopy_2d(cplx, size, x, incrx, y, incry)
     call abi_gpu_xcopy_cptr(cplx, size, c_loc(x), incrx, c_loc(y), incry)
   else if(abi_linalg_gpu_mode == ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
-    !$OMP TARGET DATA USE_DEVICE_PTR(x,y)
+    !$OMP TARGET DATA USE_DEVICE_ADDR(x,y)
     call abi_gpu_xcopy_cptr(cplx, size, c_loc(x), incrx, c_loc(y), incry)
     !$OMP END TARGET DATA
 #endif
@@ -2274,7 +2274,7 @@ subroutine abi_gpu_xcopy_2z(cplx, size, x, incrx, y, incry)
     call abi_gpu_xcopy_cptr(cplx, size, c_loc(x), incrx, c_loc(y), incry)
   else if(abi_linalg_gpu_mode == ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
-    !$OMP TARGET DATA USE_DEVICE_PTR(x,y)
+    !$OMP TARGET DATA USE_DEVICE_ADDR(x,y)
     call abi_gpu_xcopy_cptr(cplx, size, c_loc(x), incrx, c_loc(y), incry)
     !$OMP END TARGET DATA
 #endif
@@ -2397,7 +2397,7 @@ subroutine abi_gpu_xtrsm_d(cplx,side,uplo,transa,diag,m,n,alpha,a,lda,b,ldb)
       diag,m,n,alpha,c_loc(a),lda,c_loc(b),ldb)
   else if(abi_linalg_gpu_mode == ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
-    !$OMP TARGET DATA USE_DEVICE_PTR(a,b)
+    !$OMP TARGET DATA USE_DEVICE_ADDR(a,b)
     call abi_gpu_xtrsm_cptr(cplx,side,uplo,transa,&
       diag,m,n,alpha,c_loc(a),lda,c_loc(b),ldb)
     !$OMP END TARGET DATA
@@ -2429,7 +2429,7 @@ subroutine abi_gpu_xtrsm_z(cplx,side,uplo,transa,diag,m,n,alpha,a,lda,b,ldb)
       diag,m,n,alpha,c_loc(a),lda,c_loc(b),ldb)
   else if(abi_linalg_gpu_mode == ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
-    !$OMP TARGET DATA USE_DEVICE_PTR(a,b)
+    !$OMP TARGET DATA USE_DEVICE_ADDR(a,b)
     call abi_gpu_xtrsm_cptr(cplx,side,uplo,transa,&
       diag,m,n,alpha,c_loc(a),lda,c_loc(b),ldb)
     !$OMP END TARGET DATA
@@ -2461,7 +2461,7 @@ subroutine abi_gpu_xtrsm_2d(cplx,side,uplo,transa,diag,m,n,alpha,a,lda,b,ldb)
       diag,m,n,alpha,c_loc(a),lda,c_loc(b),ldb)
   else if(abi_linalg_gpu_mode == ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
-    !$OMP TARGET DATA USE_DEVICE_PTR(a,b)
+    !$OMP TARGET DATA USE_DEVICE_ADDR(a,b)
     call abi_gpu_xtrsm_cptr(cplx,side,uplo,transa,&
       diag,m,n,alpha,c_loc(a),lda,c_loc(b),ldb)
     !$OMP END TARGET DATA
@@ -2493,7 +2493,7 @@ subroutine abi_gpu_xtrsm_2z(cplx,side,uplo,transa,diag,m,n,alpha,a,lda,b,ldb)
       diag,m,n,alpha,c_loc(a),lda,c_loc(b),ldb)
   else if(abi_linalg_gpu_mode == ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
-    !$OMP TARGET DATA USE_DEVICE_PTR(a,b)
+    !$OMP TARGET DATA USE_DEVICE_ADDR(a,b)
     call abi_gpu_xtrsm_cptr(cplx,side,uplo,transa,&
       diag,m,n,alpha,c_loc(a),lda,c_loc(b),ldb)
     !$OMP END TARGET DATA
@@ -2911,7 +2911,7 @@ subroutine abi_gpu_xhegvd_d(cplx, itype, jobz, uplo, A_nrows, &
                  devInfo)
   else if(abi_linalg_gpu_mode == ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
-    !$OMP TARGET DATA USE_DEVICE_PTR(A,B,W)
+    !$OMP TARGET DATA USE_DEVICE_ADDR(A,B,W)
     call abi_gpu_xhegvd_cptr(cplx, itype, jobz, uplo, &
                  A_nrows, &
                  c_loc(A), lda, &
@@ -2957,7 +2957,7 @@ subroutine abi_gpu_xhegvd_z(cplx, itype, jobz, uplo, A_nrows, &
                  devInfo)
   else if(abi_linalg_gpu_mode == ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
-    !$OMP TARGET DATA USE_DEVICE_PTR(A,B,W)
+    !$OMP TARGET DATA USE_DEVICE_ADDR(A,B,W)
     call abi_gpu_xhegvd_cptr(cplx, itype, jobz, uplo, &
                  A_nrows, &
                  c_loc(A), lda, &
@@ -3001,7 +3001,7 @@ subroutine abi_gpu_xhegvd_2d(cplx, itype, jobz, uplo, A_nrows, &
                  devInfo)
   else if(abi_linalg_gpu_mode == ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
-    !$OMP TARGET DATA USE_DEVICE_PTR(A,B,W)
+    !$OMP TARGET DATA USE_DEVICE_ADDR(A,B,W)
     call abi_gpu_xhegvd_cptr(cplx, itype, jobz, uplo, &
                  A_nrows, &
                  c_loc(A), lda, &
@@ -3045,7 +3045,7 @@ subroutine abi_gpu_xhegvd_2z(cplx, itype, jobz, uplo, A_nrows, &
                  devInfo)
   else if(abi_linalg_gpu_mode == ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
-    !$OMP TARGET DATA USE_DEVICE_PTR(A,B,W)
+    !$OMP TARGET DATA USE_DEVICE_ADDR(A,B,W)
     call abi_gpu_xhegvd_cptr(cplx, itype, jobz, uplo, &
                  A_nrows, &
                  c_loc(A), lda, &
@@ -3209,7 +3209,7 @@ subroutine abi_gpu_xheevd_d(cplx, jobz, uplo, A_nrows, &
                  devInfo)
   else if(abi_linalg_gpu_mode == ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
-    !$OMP TARGET DATA USE_DEVICE_PTR(A,W)
+    !$OMP TARGET DATA USE_DEVICE_ADDR(A,W)
     call abi_gpu_xheevd_cptr(cplx, jobz, uplo, &
                  A_nrows, &
                  c_loc(A), lda, &
@@ -3249,7 +3249,7 @@ subroutine abi_gpu_xheevd_z(cplx, jobz, uplo, A_nrows, &
                  devInfo)
   else if(abi_linalg_gpu_mode == ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
-    !$OMP TARGET DATA USE_DEVICE_PTR(A,W)
+    !$OMP TARGET DATA USE_DEVICE_ADDR(A,W)
     call abi_gpu_xheevd_cptr(cplx, jobz, uplo, &
                  A_nrows, &
                  c_loc(A), lda, &
@@ -3288,7 +3288,7 @@ subroutine abi_gpu_xheevd_2d(cplx, jobz, uplo, A_nrows, &
                  devInfo)
   else if(abi_linalg_gpu_mode == ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
-    !$OMP TARGET DATA USE_DEVICE_PTR(A,W)
+    !$OMP TARGET DATA USE_DEVICE_ADDR(A,W)
     call abi_gpu_xheevd_cptr(cplx, jobz, uplo, &
                  A_nrows, &
                  c_loc(A), lda, &
@@ -3327,7 +3327,7 @@ subroutine abi_gpu_xheevd_2z(cplx, jobz, uplo, A_nrows, &
                  devInfo)
   else if(abi_linalg_gpu_mode == ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
-    !$OMP TARGET DATA USE_DEVICE_PTR(A,W)
+    !$OMP TARGET DATA USE_DEVICE_ADDR(A,W)
     call abi_gpu_xheevd_cptr(cplx, jobz, uplo, &
                  A_nrows, &
                  c_loc(A), lda, &
@@ -3479,7 +3479,7 @@ subroutine abi_gpu_xpotrf_d(cplx, uplo, A_nrows, &
                  devInfo)
   else if(abi_linalg_gpu_mode == ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
-    !$OMP TARGET DATA USE_DEVICE_PTR(A)
+    !$OMP TARGET DATA USE_DEVICE_ADDR(A)
     call abi_gpu_xpotrf_cptr(cplx, uplo, &
                  A_nrows, &
                  c_loc(A), lda, &
@@ -3514,7 +3514,7 @@ subroutine abi_gpu_xpotrf_z(cplx, uplo, A_nrows, &
                  devInfo)
   else if(abi_linalg_gpu_mode == ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
-    !$OMP TARGET DATA USE_DEVICE_PTR(A)
+    !$OMP TARGET DATA USE_DEVICE_ADDR(A)
     call abi_gpu_xpotrf_cptr(cplx, uplo, &
                  A_nrows, &
                  c_loc(A), lda, &
@@ -3548,7 +3548,7 @@ subroutine abi_gpu_xpotrf_2d(cplx, uplo, A_nrows, &
                  devInfo)
   else if(abi_linalg_gpu_mode == ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
-    !$OMP TARGET DATA USE_DEVICE_PTR(A)
+    !$OMP TARGET DATA USE_DEVICE_ADDR(A)
     call abi_gpu_xpotrf_cptr(cplx, uplo, &
                  A_nrows, &
                  c_loc(A), lda, &
@@ -3582,7 +3582,7 @@ subroutine abi_gpu_xpotrf_2z(cplx, uplo, A_nrows, &
                  devInfo)
   else if(abi_linalg_gpu_mode == ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
-    !$OMP TARGET DATA USE_DEVICE_PTR(A)
+    !$OMP TARGET DATA USE_DEVICE_ADDR(A)
     call abi_gpu_xpotrf_cptr(cplx, uplo, &
                  A_nrows, &
                  c_loc(A), lda, &

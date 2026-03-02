@@ -150,12 +150,12 @@ subroutine ompgpu_fourdp(cplex,ngfft,ldx,ldy,ldz,ndat,isign,fofg,fofr)
    ! Complex to Complex.
    select case (isign)
    case (FFT_INVERSE) ! +1
-     !$OMP TARGET DATA USE_DEVICE_PTR(fofg,fofr)
+     !$OMP TARGET DATA USE_DEVICE_ADDR(fofg,fofr)
      call gpu_fft_exec_z2z(FOURDP_ID, c_loc(fofg), c_loc(fofr), FFT_INVERSE)
      !$OMP END TARGET DATA
      call gpu_fft_stream_synchronize(FOURDP_ID)
    case (FFT_FORWARD) ! -1
-     !$OMP TARGET DATA USE_DEVICE_PTR(fofg,fofr)
+     !$OMP TARGET DATA USE_DEVICE_ADDR(fofg,fofr)
      call gpu_fft_exec_z2z(FOURDP_ID, c_loc(fofr), c_loc(fofg), FFT_FORWARD)
      !$OMP END TARGET DATA
      call gpu_fft_stream_synchronize(FOURDP_ID)
@@ -370,7 +370,7 @@ subroutine ompgpu_fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,ist
    call gpu_fft_exec_z2z(FOURWF_ID, c_loc(work_gpu), c_loc(fofr_amdref), FFT_INVERSE)
    !$OMP END TARGET DATA
 #else
-   !$OMP TARGET DATA USE_DEVICE_PTR(work_gpu,fofr)
+   !$OMP TARGET DATA USE_DEVICE_ADDR(work_gpu,fofr)
    call gpu_fft_exec_z2z(FOURWF_ID, c_loc(work_gpu), c_loc(fofr), FFT_INVERSE)
    !$OMP END TARGET DATA
 #endif
@@ -458,7 +458,7 @@ subroutine ompgpu_fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,ist
    call gpu_fft_exec_z2z(FOURWF_ID, c_loc(fofr_amdref), c_loc(work_gpu), FFT_FORWARD)
    !$OMP END TARGET DATA
 #else
-   !$OMP TARGET DATA USE_DEVICE_PTR(work_gpu,fofr)
+   !$OMP TARGET DATA USE_DEVICE_ADDR(work_gpu,fofr)
    call gpu_fft_exec_z2z(FOURWF_ID, c_loc(fofr), c_loc(work_gpu), FFT_FORWARD)
    !$OMP END TARGET DATA
 #endif

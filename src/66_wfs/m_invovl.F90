@@ -709,7 +709,7 @@ subroutine make_invovl(ham, dimffnl, ffnl, ph3d, mpi_enreg)
    !$OMP TARGET ENTER DATA MAP(alloc:current_gram_projs)
    !$OMP TARGET ENTER DATA MAP(to:projs)
 
-   !$OMP TARGET DATA USE_DEVICE_PTR(current_gram_projs,projs)
+   !$OMP TARGET DATA USE_DEVICE_ADDR(current_gram_projs,projs)
    call abi_gpu_xgemm(cplx, blas_transpose,'N', invovl%nprojs, slice_size, (3-cplx)*ham%npw_k, cone, &
    &                  c_loc(projs), (3-cplx)*ham%npw_k, &
    &                  c_loc(projs), (3-cplx)*ham%npw_k, czero, c_loc(current_gram_projs), invovl%nprojs)
@@ -1472,8 +1472,10 @@ subroutine solve_inner_ompgpu(invovl, ham, cplx, mpi_enreg, proj, ndat, sm1proj,
 
  integer :: array_nlmntot_pp(mpi_enreg%nproc_fft)
  integer :: nlmntot_this_proc, ibeg, iend, ierr, i, nprojs
- real(dp) :: resid(cplx, invovl%nprojs,ndat), precondresid(cplx, invovl%nprojs,ndat)
- real(dp) :: normprojs(ndat), errs(ndat), maxerr, previous_maxerr
+ real(dp), allocatable :: resid(:,:,:)
+ real(dp), allocatable :: precondresid(:,:,:)
+ real(dp), allocatable :: normprojs(:), errs(:)
+ real(dp) :: maxerr, previous_maxerr
  character(len=500) :: message
 
  real(dp), parameter :: precision = 1e-16 ! maximum relative error. TODO: use tolwfr ?
@@ -1490,13 +1492,22 @@ subroutine solve_inner_ompgpu(invovl, ham, cplx, mpi_enreg, proj, ndat, sm1proj,
  Ptsize(2) = invovl%nprojs
  Ptsize(3) = ndat
  nprojs = invovl%nprojs
+
+ allocate(resid(cplx, nprojs, ndat))
+ allocate(precondresid(cplx, nprojs, ndat))
+ allocate(normprojs(ndat))
+ allocate(errs(ndat))
+
 #if defined HAVE_GPU_HIP  && defined FC_LLVM
  !FIXME Work-around for AOMP v15.0.3 (AMD Flang fork)
  sm1proj_amdref => sm1proj
  PtPsm1proj_amdref => PtPsm1proj
 #endif
 
- !$OMP TARGET ENTER DATA MAP(alloc:errs,precondresid,resid,normprojs)
+ !$OMP TARGET ENTER DATA MAP(alloc:errs(1:ndat))
+ !$OMP TARGET ENTER DATA MAP(alloc:precondresid(1:cplx,1:nprojs,1:ndat))
+ !$OMP TARGET ENTER DATA MAP(alloc:resid(1:cplx,1:nprojs,1:ndat))
+ !$OMP TARGET ENTER DATA MAP(alloc:normprojs(1:ndat))
 
  !FIXME LLVM has trouble with performing team reduction (AOMP 15.0.2)
 #ifdef FC_LLVM
@@ -1537,14 +1548,14 @@ subroutine solve_inner_ompgpu(invovl, ham, cplx, mpi_enreg, proj, ndat, sm1proj,
    ! compute matrix multiplication : PtPsm1proj(:,:,1) = invovl%gram * sm1proj(:,:,1)
    ABI_NVTX_START_RANGE(NVTX_INVOVL_INNER_GEMM)
 #if defined HAVE_GPU_HIP && defined FC_LLVM
-   !$OMP TARGET DATA USE_DEVICE_PTR(current_gram_projs, sm1proj_amdref, PtPsm1proj_amdref)
+   !$OMP TARGET DATA USE_DEVICE_ADDR(current_gram_projs, sm1proj_amdref, PtPsm1proj_amdref)
    call abi_gpu_xgemm(cplx, 'N', 'N', nprojs, ndat, nlmntot_this_proc, cone, &
                 c_loc(current_gram_projs), nprojs,&
                 c_loc(sm1proj_amdref), nlmntot_this_proc, czero, &
                 c_loc(PtPsm1proj_amdref), nprojs)
    !$OMP END TARGET DATA
 #else
-   !$OMP TARGET DATA USE_DEVICE_PTR(current_gram_projs, sm1proj, PtPsm1proj)
+   !$OMP TARGET DATA USE_DEVICE_ADDR(current_gram_projs, sm1proj, PtPsm1proj)
    call abi_gpu_xgemm(cplx, 'N', 'N', nprojs, ndat, nlmntot_this_proc, cone, &
                 c_loc(current_gram_projs), nprojs,&
                 c_loc(sm1proj), nlmntot_this_proc, czero, &
@@ -1616,6 +1627,11 @@ subroutine solve_inner_ompgpu(invovl, ham, cplx, mpi_enreg, proj, ndat, sm1proj,
  end do
  !$OMP TARGET EXIT DATA MAP(delete:errs,resid,precondresid,normprojs)
 
+ deallocate(errs)
+ deallocate(normprojs)
+ deallocate(precondresid)
+ deallocate(resid)
+
  if(maxerr >= precision .and. maxerr >= 1e-10) then
    write(message, *) 'In invovl, max error was', maxerr, ' after 30 iterations'
    ABI_WARNING(message)
@@ -1663,14 +1679,14 @@ subroutine apply_block_ompgpu(ham, cplx, mat, nprojs, ndat, x, y, block_sliced)
            ! perform natom multiplications of size nlmn
            ! compute y = mat*x
            if(cplx == 2) then
-             !$OMP TARGET DATA USE_DEVICE_PTR(mat,x,y)
+             !$OMP TARGET DATA USE_DEVICE_ADDR(mat,x,y)
              call abi_gpu_zhemm('L','U', nlmn, ham%nattyp(itypat), cone, &
                    c_loc(mat(:, :, :, itypat)), ham%lmnmax, &
                    c_loc(x(:, shift:shift+nlmn*ham%nattyp(itypat)-1, idat)), nlmn, czero, &
                    c_loc(y(:, shift:shift+nlmn*ham%nattyp(itypat)-1, idat)), nlmn)
              !$OMP END TARGET DATA
            else
-             !$OMP TARGET DATA USE_DEVICE_PTR(mat,x,y)
+             !$OMP TARGET DATA USE_DEVICE_ADDR(mat,x,y)
              call abi_gpu_xsymm(cplx, 'L','U', nlmn, ham%nattyp(itypat), cone, &
                    c_loc(mat(:, :, :, itypat)), ham%lmnmax, &
                    c_loc(x(:, shift:shift+nlmn*ham%nattyp(itypat)-1, idat)), nlmn, czero, &
@@ -1693,7 +1709,7 @@ subroutine apply_block_ompgpu(ham, cplx, mat, nprojs, ndat, x, y, block_sliced)
       ! perform natom multiplications of size nlmn
       ! be careful here matrix extracted from x and y are not memory contiguous
       ! ==> so in the GPU version we will need to adapt leading dimension
-      !$OMP TARGET DATA USE_DEVICE_PTR(mat_ptr,x_ptr,y_ptr)
+      !$OMP TARGET DATA USE_DEVICE_ADDR(mat_ptr,x_ptr,y_ptr)
       call abi_gpu_xgemm_strided(cplx, 'N','N', &
               nlmn, ham%nattyp(itypat), nlmn, cone, &
               c_loc(mat_ptr), ham%lmnmax, 0, &

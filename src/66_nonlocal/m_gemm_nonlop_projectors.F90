@@ -475,7 +475,7 @@ contains
  subroutine free_ompgpu_current_ikpt_projs(ik)
 
   integer,intent(in) :: ik
-#ifdef HAVE_OPENMP_OFFLOAD
+#if defined(HAVE_OPENMP_OFFLOAD) && !defined(FC_LLVM)
   !NOTE: Those pointers exists to be served to OpenMP TARGET directives to hide
   !      the datastructure gemm_nonlop_kpt which is not supported in GCC, LLVM and Cray
   real(dp), ABI_CONTIGUOUS pointer :: gemm_nonlop_kpt_projs_ompptr(:,:,:)
@@ -505,7 +505,7 @@ contains
  subroutine free_ompgpu_current_ikpt_dprojs(ik)
 
   integer,intent(in) :: ik
-#ifdef HAVE_OPENMP_OFFLOAD
+#if defined(HAVE_OPENMP_OFFLOAD) && !defined(FC_LLVM)
   !NOTE: Those pointers exists to be served to OpenMP TARGET directives to hide
   !      the datastructure gemm_nonlop_kpt which is not supported in GCC, LLVM and Cray
   real(dp), ABI_CONTIGUOUS pointer :: gemm_nonlop_kpt_dprojs_ompptr(:,:,:)
@@ -560,7 +560,7 @@ contains
   logical,intent(in) :: is_kprime
   integer :: ik,rank,nprojs_blk,nprojs_my_blk,nprojs_last_blk
   logical :: is_last_rank
-#ifdef HAVE_OPENMP_OFFLOAD
+#if defined(HAVE_OPENMP_OFFLOAD) && !defined(FC_LLVM)
   !NOTE: Those pointers exists to be served to OpenMP TARGET directives to hide
   !      the datastructure gemm_nonlop_kpt which is not supported in GCC, LLVM and Cray
   real(dp), ABI_CONTIGUOUS pointer :: gemm_nonlop_kpt_projs_ompptr(:,:,:)
@@ -603,14 +603,14 @@ contains
 
     if(istwf_k <= 1) then
       ABI_MALLOC(gemm_nonlop_kpt(ik)%projs, (2, npw, nprojs_last_blk))
-#ifdef HAVE_OPENMP_OFFLOAD
+#if defined(HAVE_OPENMP_OFFLOAD) && !defined(FC_LLVM)
       gemm_nonlop_kpt_projs_ompptr => gemm_nonlop_kpt(ik)%projs
       !$OMP TARGET ENTER DATA MAP(alloc:gemm_nonlop_kpt_projs_ompptr) IF(gpu_option==ABI_GPU_OPENMP)
 #endif
     else
       ABI_MALLOC(gemm_nonlop_kpt(ik)%projs_r, (1, npw, nprojs_last_blk))
       ABI_MALLOC(gemm_nonlop_kpt(ik)%projs_i, (1, npw, nprojs_last_blk))
-#ifdef HAVE_OPENMP_OFFLOAD
+#if defined(HAVE_OPENMP_OFFLOAD) && !defined(FC_LLVM)
       gemm_nonlop_kpt_projs_r_ompptr => gemm_nonlop_kpt(ik)%projs_r
       gemm_nonlop_kpt_projs_i_ompptr => gemm_nonlop_kpt(ik)%projs_i
       !$OMP TARGET ENTER DATA MAP(alloc:gemm_nonlop_kpt_projs_r_ompptr) IF(gpu_option==ABI_GPU_OPENMP)
@@ -648,13 +648,13 @@ contains
       end if
       if(istwf_k <= 1) then
         ABI_MALLOC(gemm_nonlop_kpt(ik)%dprojs, (2, npw, nprojs_last_blk*ndgxdt))
-#ifdef HAVE_OPENMP_OFFLOAD
+#if defined(HAVE_OPENMP_OFFLOAD) && !defined(FC_LLVM)
         gemm_nonlop_kpt_dprojs_ompptr => gemm_nonlop_kpt(ik)%dprojs
         !$OMP TARGET ENTER DATA MAP(alloc:gemm_nonlop_kpt_dprojs_ompptr) IF(gpu_option==ABI_GPU_OPENMP)
 #endif
         if(nd2gxdt>0) then
           ABI_MALLOC(gemm_nonlop_kpt(ik)%d2projs, (2, npw, nprojs_last_blk*nd2gxdt))
-#ifdef HAVE_OPENMP_OFFLOAD
+#if defined(HAVE_OPENMP_OFFLOAD) && !defined(FC_LLVM)
           gemm_nonlop_kpt_d2projs_ompptr => gemm_nonlop_kpt(ik)%d2projs
           !$OMP TARGET ENTER DATA MAP(alloc:gemm_nonlop_kpt_d2projs_ompptr) IF(gpu_option==ABI_GPU_OPENMP)
 #endif
@@ -662,7 +662,7 @@ contains
       else
         ABI_MALLOC(gemm_nonlop_kpt(ik)%dprojs_r, (1, npw, nprojs_last_blk*ndgxdt))
         ABI_MALLOC(gemm_nonlop_kpt(ik)%dprojs_i, (1, npw, nprojs_last_blk*ndgxdt))
-#ifdef HAVE_OPENMP_OFFLOAD
+#if defined(HAVE_OPENMP_OFFLOAD) && !defined(FC_LLVM)
         gemm_nonlop_kpt_dprojs_r_ompptr => gemm_nonlop_kpt(ik)%dprojs_r
         gemm_nonlop_kpt_dprojs_i_ompptr => gemm_nonlop_kpt(ik)%dprojs_i
         !$OMP TARGET ENTER DATA MAP(alloc:gemm_nonlop_kpt_dprojs_r_ompptr) IF(gpu_option==ABI_GPU_OPENMP)
