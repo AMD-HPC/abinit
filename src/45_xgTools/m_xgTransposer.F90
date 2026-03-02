@@ -481,7 +481,7 @@ module m_xgTransposer
         else
           if(xgTransposer%gpu_option == ABI_GPU_OPENMP) then
 #if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
-#ifdef HAVE_OPENMP_OFFLOAD_DATASTRUCTURE
+#if defined HAVE_OPENMP_OFFLOAD_DATASTRUCTURE || defined FC_LLVM
             !$OMP TARGET EXIT DATA MAP(delete:xgTransposer%buffer)
 #else
             xgTransposer__buffer => xgTransposer%buffer
@@ -505,7 +505,7 @@ module m_xgTransposer
         end if
         if(xgTransposer%gpu_option == ABI_GPU_OPENMP) then
 #if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
-#ifdef HAVE_OPENMP_OFFLOAD_DATASTRUCTURE
+#if defined HAVE_OPENMP_OFFLOAD_DATASTRUCTURE || defined FC_LLVM
           !$OMP TARGET ENTER DATA MAP(alloc:xgTransposer%buffer)
 #else
           xgTransposer__buffer => xgTransposer%buffer
@@ -1151,7 +1151,7 @@ module m_xgTransposer
       else
         if(xgTransposer%gpu_option == ABI_GPU_OPENMP) then
 #if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
-#ifdef HAVE_OPENMP_OFFLOAD_DATASTRUCTURE
+#if defined HAVE_OPENMP_OFFLOAD_DATASTRUCTURE || defined FC_LLVM
           !$OMP TARGET EXIT DATA MAP(delete:xgTransposer%buffer)
 #else
           xgTransposer__buffer => xgTransposer%buffer
