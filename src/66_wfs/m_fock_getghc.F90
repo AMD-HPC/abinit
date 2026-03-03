@@ -671,7 +671,7 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg,ndat)
         !$OMP& PRIVATE(idat,idat_occ,ifft)
         do idat=1,ndat
         do idat_occ=1,ndat_occ
-          !$OMP PARALLEL DO PRIVATE(ifft)
+          ! !$OMP PARALLEL DO PRIVATE(ifft)
           do ifft=1,nfftf
             rhor_munu(1,ifft,idat_occ,idat)=rhor_munu(1,ifft,idat_occ,idat)+rho12(1,ifft,nspinor,idat_occ,idat)
             rhor_munu(2,ifft,idat_occ,idat)=rhor_munu(2,ifft,idat_occ,idat)-rho12(2,ifft,nspinor,idat_occ,idat)
@@ -684,7 +684,7 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg,ndat)
          !$OMP& MAP(to:rhor_munu,rho12) PRIVATE(idat,idat_occ)
          do idat=1,ndat
          do idat_occ=1,ndat_occ
-         !$OMP PARALLEL DO PRIVATE(ifft)
+         ! !$OMP PARALLEL DO PRIVATE(ifft)
          do ifft=1,nfftf
            rhor_munu(1,ifft,idat_occ,idat)=rhor_munu(1,ifft,idat_occ,idat)+rho12(1,ifft,nspinor,idat_occ,idat)
            rhor_munu(2,ifft,idat_occ,idat)=rhor_munu(2,ifft,idat_occ,idat)-rho12(2,ifft,nspinor,idat_occ,idat)
