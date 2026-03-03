@@ -569,9 +569,9 @@ subroutine opernlc_ylm_ompgpu(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,c
                  i0lmn=ilmn*(ilmn-1)/2
                  enl_(1)=enl_ptr2(2*i0lmn+jlmn-1,index_enl,1,min(ndat_enl,idat))
                  enl_(2)=enl_ptr2(2*i0lmn+jlmn,index_enl,1,min(ndat_enl,idat))
-                 do ii=1,cplex
-                   gxi(ii)=gx(ii,ilmn+(ia-1)*nlmn+ibeg,1)
-                 end do
+                 ! do ii=1,cplex
+                 !  gxi(ii)=gx(ii,ilmn+(ia-1)*nlmn+ibeg,1)
+                 ! end do
                  gxfac_(1,jlmn+(ia-1)*nlmn+ibeg,1+nspinor*(idat-1)) = &
 &                   gxfac_(1,jlmn+(ia-1)*nlmn+ibeg,1+nspinor*(idat-1))+enl_(1)*gxi(1)
                  gxfac_(2,jlmn+(ia-1)*nlmn+ibeg,1+nspinor*(idat-1)) = &
