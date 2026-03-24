@@ -1468,8 +1468,10 @@ subroutine solve_inner_ompgpu(invovl, ham, cplx, mpi_enreg, proj, ndat, sm1proj,
 
  integer :: array_nlmntot_pp(mpi_enreg%nproc_fft)
  integer :: nlmntot_this_proc, ibeg, iend, ierr, i, nprojs
- real(dp) :: resid(cplx, invovl%nprojs,ndat), precondresid(cplx, invovl%nprojs,ndat)
- real(dp) :: normprojs(ndat), errs(ndat), maxerr, previous_maxerr
+ real(dp), allocatable :: resid(:,:,:)
+ real(dp), allocatable :: precondresid(:,:,:)
+ real(dp), allocatable :: normprojs(:), errs(:)
+ real(dp) :: maxerr, previous_maxerr
  character(len=500) :: message
 
  real(dp), parameter :: precision = 1e-16 ! maximum relative error. TODO: use tolwfr ?
@@ -1484,7 +1486,15 @@ subroutine solve_inner_ompgpu(invovl, ham, cplx, mpi_enreg, proj, ndat, sm1proj,
  Ptsize(3) = ndat
  nprojs = invovl%nprojs
 
- !$OMP TARGET ENTER DATA MAP(alloc:errs,precondresid,resid,normprojs)
+ allocate(resid(cplx, nprojs, ndat))
+ allocate(precondresid(cplx, nprojs, ndat))
+ allocate(normprojs(ndat))
+ allocate(errs(ndat))
+
+ !$OMP TARGET ENTER DATA MAP(alloc:errs(1:ndat))
+ !$OMP TARGET ENTER DATA MAP(alloc:precondresid(1:cplx,1:nprojs,1:ndat))
+ !$OMP TARGET ENTER DATA MAP(alloc:resid(1:cplx,1:nprojs,1:ndat))
+ !$OMP TARGET ENTER DATA MAP(alloc:normprojs(1:ndat))
 
  !FIXME LLVM has trouble with performing team reduction (AOMP 15.0.2)
 #ifdef FC_LLVM
@@ -1598,6 +1608,11 @@ subroutine solve_inner_ompgpu(invovl, ham, cplx, mpi_enreg, proj, ndat, sm1proj,
    end do
  end do
  !$OMP TARGET EXIT DATA MAP(delete:errs,resid,precondresid,normprojs)
+
+ deallocate(errs)
+ deallocate(normprojs)
+ deallocate(precondresid)
+ deallocate(resid)
 
  if(maxerr >= precision .and. maxerr >= 1e-10) then
    write(message, *) 'In invovl, max error was', maxerr, ' after 30 iterations'
