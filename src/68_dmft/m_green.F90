@@ -1006,6 +1006,7 @@ subroutine compute_green_batched_core(green,paw_dmft,self,optself,optlog)
  integer :: me_kpt,mkmem,myproc,natom,nkpt,nmoments,nspinor,nsppol,gpu_option,ndat
  integer :: option,shift,shift_green,spacecomm,optoper_ksloc
  real(dp) :: fermilevel,wtk,temp
+ real(dp) :: re_gt,im_gt,inv_denom
  complex(dp) :: green_tmp,trace_tmp
  real(dp), allocatable :: eig(:),rwork(:),fac(:)
  complex(dp), allocatable :: mat_tmp(:,:),work(:),omega_current(:)
@@ -1157,7 +1158,14 @@ subroutine compute_green_batched_core(green,paw_dmft,self,optself,optlog)
          do ikpt=1,mkmem
            do ib=1,mbandc
              green_tmp = omega_current(ifreq) + fermilevel - eigen_dft(ib,ikpt+shift,isppol)
-             ks(ib,ib+(idat-1)*mbandc,ikpt+shift_green,isppol) = cone / green_tmp
+            ! What ABINIT is doing here is evaluating the reciprocal of green_tmp (1/green_tmp)
+            ! whith is actually (a - bi)/(a^2 + b^2)
+            ! Just writing the division makes the compiled emit __divcd3 on amdflang, we can  avoid it by writing out the expression instead
+            ! ks(ib,ib+(idat-1)*mbandc,ikpt+shift_green,isppol) = cone / green_tmp
+            re_gt = real(green_tmp, dp)
+            im_gt = aimag(green_tmp)
+            inv_denom = 1.0_dp / (re_gt*re_gt + im_gt*im_gt)
+            ks(ib,ib+(idat-1)*mbandc,ikpt+shift_green,isppol) = cmplx(re_gt*inv_denom, -im_gt*inv_denom, dp)
            end do ! ib
          end do ! ikpt
        end do ! isppol

@@ -1067,8 +1067,8 @@ contains
   real(dp), intent(in), target :: kpg(npw,nkpg)
 
   logical :: map_ffnl,map_ph3d,is_last_rank
-  integer,parameter :: alpha(6)=(/1,2,3,3,3,2/),beta(6)=(/1,2,3,2,1,1/)
-  integer,parameter :: gamma(3,3)=reshape((/1,6,5,6,2,4,5,4,3/),(/3,3/))
+  integer :: alpha(6)=(/1,2,3,3,3,2/),beta(6)=(/1,2,3,2,1,1/)
+  integer :: gamma(3,3)=reshape((/1,6,5,6,2,4,5,4,3/),(/3,3/))
   integer :: ndprojs, nd2projs, ilmn_p, nlmn_p
   integer :: il, ipw, ik, idir, idir1, idir2, jdir1, jdir2, kdir1, kdir2, ldir1, ldir2, ldir3, ldir4, ffnl_dir
   integer :: itypat, ilmn, nlmn, ia, iaph3d, igrad, shift, shift_grad, shift_grad2
