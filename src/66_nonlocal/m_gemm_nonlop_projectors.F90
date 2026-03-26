@@ -1454,7 +1454,15 @@ contains
       if(signs==1 .and. (choice==2 .or. choice==23 .or. choice==4 .or. choice==54 .or. choice==6)) then
         igrad=0; if(choice==23 .or. choice==6) igrad=6
         if(istwf_k <= 1) then
+#if defined FC_LLVM
+          !$OMP TARGET ENTER DATA MAP(to:projs,dprojs,kpg) IF(gpu_option==ABI_GPU_OPENMP)
+#endif
 #ifdef HAVE_OPENMP_OFFLOAD
+#if defined FC_LLVM
+          !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO COLLAPSE(3) 
+          !$OMP& PRIVATE(ilmn,ipw,idir) &
+          !$OMP& IF(gpu_option==ABI_GPU_OPENMP)
+#else
           !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO COLLAPSE(3) &
           !$OMP& PRIVATE(ilmn,ipw,idir) MAP(to:projs,dprojs,kpg) &
           !$OMP& IF(gpu_option==ABI_GPU_OPENMP)
@@ -1469,6 +1477,9 @@ contains
               end do
             end do
           end do
+#if defined FC_LLVM
+          !$OMP TARGET EXIT DATA MAP(delete:projs,dprojs,kpg) IF(gpu_option==ABI_GPU_OPENMP)
+#endif
         else ! istwf_k>1
 #ifdef HAVE_OPENMP_OFFLOAD
           !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO COLLAPSE(3) &
