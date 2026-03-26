@@ -802,7 +802,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
  end if
 
 #ifdef HAVE_OPENMP_OFFLOAD
- !$OMP TARGET ENTER DATA MAP(alloc:cwavef) IF(gs_hamk%gpu_option==ABI_GPU_OPENMP)
+ !$OMP TARGET DATA MAP(alloc:cwavef) IF(gs_hamk%gpu_option==ABI_GPU_OPENMP)
 #endif
 
  ! Loop over bands or blocks of bands.
@@ -812,7 +812,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
    !cwavef(:,:)=cg(:,1+(iblock-1)*npw_k*my_nspinor*blocksize+icg:iblock*npw_k*my_nspinor*blocksize+icg)
    if(gs_hamk%gpu_option==ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
-     !$OMP TARGET TEAMS DISTRIBUTE MAP(to:cg_k,cwavef) PRIVATE(iblocksize)
+     !$OMP TARGET TEAMS DISTRIBUTE MAP(to:cg_k) PRIVATE(iblocksize)
      do iblocksize=1,blocksize*my_nspinor
        !$OMP PARALLEL DO PRIVATE(ipw)
        do ipw=1,npw_k
@@ -903,7 +903,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
            if(gs_hamk%gpu_option==ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
              !$OMP TARGET ENTER DATA MAP(alloc:cwavefb)
-             !$OMP TARGET TEAMS DISTRIBUTE MAP(to:cwavefb,cwavef) PRIVATE(iband)
+             !$OMP TARGET TEAMS DISTRIBUTE MAP(to:cwavefb) PRIVATE(iband)
              do iband=1,blocksize
                !$OMP PARALLEL DO PRIVATE(ipw)
                do ipw=1,npw_k
@@ -1091,7 +1091,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
            if (mpi_enreg%paral_spinor==0) then
 #ifdef HAVE_OPENMP_OFFLOAD
              !$OMP TARGET ENTER DATA MAP(alloc:cwavefb)
-             !$OMP TARGET TEAMS DISTRIBUTE MAP(to:cwavefb,cwavef) PRIVATE(iband)
+             !$OMP TARGET TEAMS DISTRIBUTE MAP(to:cwavefb) PRIVATE(iband)
              do iband=1,blocksize
                !$OMP PARALLEL DO PRIVATE(ipw)
                do ipw=1,npw_k
@@ -1311,7 +1311,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
  end do !  End of loop on blocks
 
 #ifdef HAVE_OPENMP_OFFLOAD
- !$OMP TARGET EXIT DATA MAP(delete:cwavef) IF(gs_hamk%gpu_option==ABI_GPU_OPENMP)
+ !$OMP END TARGET DATA
 #endif
 
  ! restore safe value related to GEMM nonlop slicing and GPU in case of forces compute

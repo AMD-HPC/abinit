@@ -476,7 +476,7 @@ contains
         end if
         ABI_MALLOC(xg%vecC,(1:rows,1:cols))
         xg%trans = 'c'
-#if defined HAVE_OPENMP_OFFLOAD_DATASTRUCTURE
+#if defined HAVE_OPENMP_OFFLOAD_DATASTRUCTURE 
         !$OMP TARGET ENTER DATA MAP(alloc:xg%vecC)
 #else
 !FIXME For several compilers, OMP doesn't work correctly with structured types, so use pointers
@@ -5097,7 +5097,7 @@ contains
     if (xgBlock%gpu_option==ABI_GPU_KOKKOS .or. xgBlock%gpu_option==ABI_GPU_OPENMP) then
 
       if ( xgBlock%ldim .eq. xgBlock%rows ) then
-#if defined HAVE_KOKKOS || defined HAVE_OPENMP_OFFLOAD_DATASTRUCTURE
+#if defined HAVE_KOKKOS || defined HAVE_OPENMP_OFFLOAD_DATASTRUCTURE || defined FC_LLVM 
         select case(xgBlock%space)
         case (SPACE_R,SPACE_CR)
           call abi_gpu_xscal(1, fact*xgBlock%ldim*xgBlock%cols/inc, valc, xgBlock%vecR, inc)
@@ -5122,7 +5122,7 @@ contains
 
       else
         !FIXME Do loop that calls scal on each column sequentially, might be improved
-#if defined HAVE_KOKKOS || defined HAVE_OPENMP_OFFLOAD_DATASTRUCTURE
+#if defined HAVE_KOKKOS || defined HAVE_OPENMP_OFFLOAD_DATASTRUCTURE  || defined FC_LLVM
         select case(xgBlock%space)
         case (SPACE_R,SPACE_CR)
           do i=1,xgBlock%cols
