@@ -332,6 +332,11 @@ module m_abi_linalg
 
 #ifdef HAVE_GPU
 
+  public :: alloc_on_gpu
+  public :: dealloc_on_gpu
+  public :: copy_from_gpu
+  public :: copy_on_gpu
+
   interface
 
     subroutine check_gpu_mem(str) bind(c, name="check_gpu_mem_")
@@ -352,6 +357,22 @@ module m_abi_linalg
       implicit none
       type(c_ptr),                    intent(inout)  :: gpu_ptr
     end subroutine dealloc_on_gpu
+
+    subroutine copy_from_gpu_c(dtab,gpu_ptr,size_in_bytes) bind(c, name="copy_from_gpu_")
+      use, intrinsic :: iso_c_binding
+      implicit none
+      type(c_ptr),                    intent(in)     :: dtab
+      type(c_ptr),                    intent(inout)  :: gpu_ptr
+      integer(kind=c_size_t),         intent(in)     :: size_in_bytes
+    end subroutine copy_from_gpu_c
+
+    subroutine copy_on_gpu_c(dtab,gpu_ptr,size_in_bytes) bind(c, name="copy_on_gpu_")
+      use, intrinsic :: iso_c_binding
+      implicit none
+      type(c_ptr),                    intent(in)     :: dtab
+      type(c_ptr),                    intent(inout)  :: gpu_ptr
+      integer(kind=c_size_t),         intent(in)     :: size_in_bytes
+    end subroutine copy_on_gpu_c
 
     subroutine copy_gpu_to_gpu(dest_gpu_ptr, src_gpu_ptr, size_in_bytes) bind(c, name="copy_gpu_to_gpu_cpp_")
       use, intrinsic :: iso_c_binding
@@ -409,9 +430,6 @@ module m_abi_linalg
  public :: gpu_xsygvd
  public :: gpu_xsygvd_bufferSize
 #endif
-
- public :: alloc_on_gpu
- public :: dealloc_on_gpu
 
  public :: copy_gpu_to_gpu
  public :: gpu_memset
@@ -472,6 +490,28 @@ module m_abi_linalg
 
 CONTAINS  !===========================================================
 !!***
+
+#ifdef HAVE_GPU
+
+subroutine copy_from_gpu(dtab,gpu_ptr,size_in_bytes)
+  use, intrinsic :: iso_c_binding
+  implicit none
+  type(*), intent(inout) :: dtab(*)
+  type(c_ptr), intent(inout) :: gpu_ptr
+  integer(kind=c_size_t), intent(in) :: size_in_bytes
+  call copy_from_gpu_c(c_loc(dtab), gpu_ptr, size_in_bytes)
+end subroutine copy_from_gpu
+
+subroutine copy_on_gpu(dtab,gpu_ptr,size_in_bytes)
+  use, intrinsic :: iso_c_binding
+  implicit none
+  type(*), intent(inout) :: dtab(*)
+  type(c_ptr), intent(inout) :: gpu_ptr
+  integer(kind=c_size_t), intent(in) :: size_in_bytes
+  call copy_on_gpu_c(c_loc(dtab), gpu_ptr, size_in_bytes)
+end subroutine copy_on_gpu
+
+#endif
 
 !!****f* m_abi_linalg/abi_linalg_init
 !! NAME
