@@ -221,7 +221,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
  integer :: iorder_cprj,ipw,ispinor,iispinor,ispinor_index,istwf_k,iwavef,me_g0,mgsc,my_nspinor,n1,n2,n3 !kk
  integer :: nband_k_cprj,ncols_cprj,nblockbd,ncpgr,ndat,niter,nkpt_max,nnlout,ortalgo,ndat_fft
  integer :: paw_opt,quit,signs,space,spaceComm,tim_nonlop,wfoptalg,wfopta10
- integer :: gpu_option_tmp,nblk_gemm_nonlop,blksize_gemm_nonlop_tmp
+ integer :: gpu_option_tmp,nblk_gemm_nonlop,blksize_gemm_nonlop_tmp,ncwavef
  logical :: nspinor1TreatedByThisProc,nspinor2TreatedByThisProc
  real(dp) :: ar,ar2,ar_im,eshift,occblock,norm
  real(dp) :: max_resid,weight,cpu,wall,gflops
@@ -756,6 +756,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
  else
    ABI_MALLOC(cwavef, (2,npw_k*my_nspinor*blocksize))
  end if
+ ncwavef = npw_k*my_nspinor*blocksize
 
  if (dtset%cprj_in_memory/=2) then
    if (gs_hamk%usepaw==1.and.(iscf>0.or.gs_hamk%usecprj==1)) then
@@ -802,7 +803,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
  end if
 
 #ifdef HAVE_OPENMP_OFFLOAD
- !$OMP TARGET DATA MAP(alloc:cwavef) IF(gs_hamk%gpu_option==ABI_GPU_OPENMP)
+ !$OMP TARGET DATA MAP(alloc:cwavef(1:2,1:ncwavef)) IF(gs_hamk%gpu_option==ABI_GPU_OPENMP)
 #endif
 
  ! Loop over bands or blocks of bands.
@@ -902,7 +903,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
            ibs=(iblock-1)*npw_k*my_nspinor*blocksize
            if(gs_hamk%gpu_option==ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
-             !$OMP TARGET ENTER DATA MAP(alloc:cwavefb)
+             !$OMP TARGET ENTER DATA MAP(alloc:cwavefb(1:2,1:npw_k*blocksize,1:2))
              !$OMP TARGET TEAMS DISTRIBUTE MAP(to:cwavefb) PRIVATE(iband)
              do iband=1,blocksize
                !$OMP PARALLEL DO PRIVATE(ipw)
@@ -947,7 +948,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 
              if(gs_hamk%gpu_option==ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
-               !$OMP TARGET ENTER DATA MAP(alloc:cwavef_x,cwavef_y)
+               !$OMP TARGET ENTER DATA MAP(alloc:cwavef_x(1:2,1:npw_k*blocksize),cwavef_y(1:2,1:npw_k*blocksize))
                !$OMP TARGET TEAMS DISTRIBUTE MAP(to:cwavef_x,cwavef_y,cwavefb) PRIVATE(iband)
                do iband=1,blocksize
                  !$OMP PARALLEL DO PRIVATE(ipw)
@@ -991,14 +992,14 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
                          weight_array_r=weight_t,weight_array_i=weight_t,&
                          gpu_option=dtset%gpu_option)
 #ifdef HAVE_OPENMP_OFFLOAD
-             !$OMP TARGET EXIT DATA MAP(delete:cwavef_x,cwavef_y) IF(gs_hamk%gpu_option==ABI_GPU_OPENMP)
+             !$OMP TARGET EXIT DATA MAP(delete:cwavef_x(1:2,1:npw_k*blocksize),cwavef_y(1:2,1:npw_k*blocksize)) IF(gs_hamk%gpu_option==ABI_GPU_OPENMP)
 #endif
              ABI_FREE(cwavef_x)
              ABI_FREE(cwavef_y)
            end if
 
 #ifdef HAVE_OPENMP_OFFLOAD
-           !$OMP TARGET EXIT DATA MAP(delete:cwavefb) IF(gs_hamk%gpu_option==ABI_GPU_OPENMP)
+           !$OMP TARGET EXIT DATA MAP(delete:cwavefb(1:2,1:npw_k*blocksize,1:2)) IF(gs_hamk%gpu_option==ABI_GPU_OPENMP)
 #endif
            ABI_FREE(cwavefb)
          end if
@@ -1090,7 +1091,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
            ! --- No parallelization over spinors ---
            if (mpi_enreg%paral_spinor==0) then
 #ifdef HAVE_OPENMP_OFFLOAD
-             !$OMP TARGET ENTER DATA MAP(alloc:cwavefb)
+             !$OMP TARGET ENTER DATA MAP(alloc:cwavefb(1:2,1:npw_k*blocksize,1:2))
              !$OMP TARGET TEAMS DISTRIBUTE MAP(to:cwavefb) PRIVATE(iband)
              do iband=1,blocksize
                !$OMP PARALLEL DO PRIVATE(ipw)
@@ -1143,7 +1144,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
            ABI_MALLOC(cwavef_y,(2,npw_k*blocksize))
            if(gs_hamk%gpu_option==ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
-             !$OMP TARGET ENTER DATA MAP(alloc:cwavef_x,cwavef_y)
+             !$OMP TARGET ENTER DATA MAP(alloc:cwavef_x(1:2,1:npw_k*blocksize),cwavef_y(1:2,1:npw_k*blocksize))
              !$OMP TARGET TEAMS DISTRIBUTE MAP(to:cwavef_x,cwavef_y,cwavefb) PRIVATE(iband)
              do iband=1,blocksize
                !$OMP PARALLEL DO PRIVATE(ipw)
@@ -1179,7 +1180,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
                gpu_option=dtset%gpu_option)
            end if
 #ifdef HAVE_OPENMP_OFFLOAD
-           !$OMP TARGET EXIT DATA MAP(delete:cwavef_x,cwavef_y) IF(gs_hamk%gpu_option==ABI_GPU_OPENMP)
+           !$OMP TARGET EXIT DATA MAP(delete:cwavef_x(1:2,1:npw_k*blocksize),cwavef_y(1:2,1:npw_k*blocksize)) IF(gs_hamk%gpu_option==ABI_GPU_OPENMP)
 #endif
            ABI_FREE(cwavef_x)
            ABI_FREE(cwavef_y)

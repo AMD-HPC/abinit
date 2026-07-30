@@ -324,18 +324,18 @@ CONTAINS
   end if
 
   if(current_ikpt_in_gpu /= -1) then
-    !$OMP TARGET EXIT DATA MAP(delete:current_gram_projs)
-    !$OMP TARGET EXIT DATA MAP(delete:current_inv_sij)
-    !$OMP TARGET EXIT DATA MAP(delete:current_inv_s_approx)
+    !$OMP TARGET EXIT DATA MAP(delete:invovl_kpt(current_ikpt_in_gpu)%gram_projs(:,:,:))
+    !$OMP TARGET EXIT DATA MAP(delete:invovl_kpt(current_ikpt_in_gpu)%inv_sij(:,:,:,:))
+    !$OMP TARGET EXIT DATA MAP(delete:invovl_kpt(current_ikpt_in_gpu)%inv_s_approx(:,:,:,:))
   end if
 
   current_gram_projs   => invovl_kpt(ikpt)%gram_projs
   current_inv_sij      => invovl_kpt(ikpt)%inv_sij
   current_inv_s_approx => invovl_kpt(ikpt)%inv_s_approx
 
-  !$OMP TARGET ENTER DATA MAP(to:current_gram_projs)
-  !$OMP TARGET ENTER DATA MAP(to:current_inv_sij)
-  !$OMP TARGET ENTER DATA MAP(to:current_inv_s_approx)
+  !$OMP TARGET ENTER DATA MAP(to:invovl_kpt(ikpt)%gram_projs(:,:,:))
+  !$OMP TARGET ENTER DATA MAP(to:invovl_kpt(ikpt)%inv_sij(:,:,:,:))
+  !$OMP TARGET ENTER DATA MAP(to:invovl_kpt(ikpt)%inv_s_approx(:,:,:,:))
   current_ikpt_in_gpu=ikpt
 
  end subroutine refresh_invovl_ompgpu_kpt
@@ -390,9 +390,9 @@ CONTAINS
   if(gpu_option==ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
     if(gpu_initialized==1 .and. current_ikpt_in_gpu == ikpt) then
-      !$OMP TARGET EXIT DATA MAP(delete:current_gram_projs)
-      !$OMP TARGET EXIT DATA MAP(delete:current_inv_sij)
-      !$OMP TARGET EXIT DATA MAP(delete:current_inv_s_approx)
+      !$OMP TARGET EXIT DATA MAP(delete:invovl_kpt(ikpt)%gram_projs(:,:,:))
+      !$OMP TARGET EXIT DATA MAP(delete:invovl_kpt(ikpt)%inv_sij(:,:,:,:))
+      !$OMP TARGET EXIT DATA MAP(delete:invovl_kpt(ikpt)%inv_s_approx(:,:,:,:))
       nullify(current_gram_projs)
       nullify(current_inv_sij)
       nullify(current_inv_s_approx)
@@ -704,8 +704,8 @@ subroutine make_invovl(ham, dimffnl, ffnl, ph3d, mpi_enreg)
    ! compute gram_projs in one GEMM, only one FFT proc expected in GPU mode
    slice_size = array_nprojs_pp(1)
    invovl_gram_projs   => invovl%gram_projs
-   !$OMP TARGET ENTER DATA MAP(alloc:invovl_gram_projs)
-   !$OMP TARGET ENTER DATA MAP(to:projs)
+   !$OMP TARGET ENTER DATA MAP(alloc:invovl%gram_projs(1:cplx,1:invovl%nprojs,1:slice_size))
+   !$OMP TARGET ENTER DATA MAP(to:projs(1:2,1:ham%npw_k,1:slice_size))
 
    !$OMP TARGET DATA USE_DEVICE_ADDR(invovl_gram_projs,projs)
    call abi_gpu_xgemm(cplx, blas_transpose,'N', invovl%nprojs, slice_size, (3-cplx)*ham%npw_k, cone, &
@@ -713,8 +713,8 @@ subroutine make_invovl(ham, dimffnl, ffnl, ph3d, mpi_enreg)
    &                  c_loc(projs), (3-cplx)*ham%npw_k, czero, c_loc(invovl_gram_projs), invovl%nprojs)
    !$OMP END TARGET DATA
    call xmpi_sum(invovl%gram_projs,mpi_enreg%comm_band,ierr,use_omp_map=.true.)
-   !$OMP TARGET EXIT DATA MAP(from:invovl_gram_projs)
-   !$OMP TARGET EXIT DATA MAP(delete:projs)
+   !$OMP TARGET EXIT DATA MAP(from:invovl%gram_projs(1:cplx,1:invovl%nprojs,1:slice_size))
+   !$OMP TARGET EXIT DATA MAP(delete:projs(1:2,1:ham%npw_k,1:slice_size))
 #endif
  else
    do iproc = 1, mpi_enreg%nproc_fft

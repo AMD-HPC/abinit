@@ -58,7 +58,10 @@ contains
    cur_ffnl_k          => ffnl_k
    cur_ph3d_k          => ph3d_k
    if(present(kg_k_gather))  cur_kg_k_gather     => kg_k_gather
-   !$OMP TARGET ENTER DATA MAP(to:cur_kg_k,cur_kg_kp,cur_ffnl_k,cur_ph3d_k,cur_kg_k_gather)
+   !$OMP TARGET ENTER DATA MAP(to:kg_k,kg_kp,ffnl_k,ph3d_k)
+   if(present(kg_k_gather)) then
+     !$OMP TARGET ENTER DATA MAP(to:kg_k_gather)
+   end if
 #else
    ABI_UNUSED((/kg_k,kg_kp,kg_k_gather/))
    ABI_UNUSED((/ffnl_k,ph3d_k/))
@@ -69,9 +72,16 @@ contains
  subroutine ompgpu_free_hamilt_buffers()
 #ifdef HAVE_OPENMP_OFFLOAD
 
-   !$OMP TARGET EXIT DATA MAP(release:cur_kg_k,cur_kg_kp,cur_ffnl_k,cur_ph3d_k,cur_kg_k_gather)
+   if(associated(cur_kg_k)) then
+     !$OMP TARGET EXIT DATA MAP(release:cur_kg_k(:,:),cur_kg_kp(:,:),cur_ffnl_k(:,:,:,:),cur_ph3d_k(:,:,:))
+     if(associated(cur_kg_k_gather)) then
+       !$OMP TARGET EXIT DATA MAP(release:cur_kg_k_gather(:,:))
+     end if
+   end if
    cur_kg_k            => null()
    cur_kg_kp           => null()
+   cur_ffnl_k          => null()
+   cur_ph3d_k          => null()
    cur_kg_k_gather     => null()
 #else
    ABI_BUG("ABINIT wasn't compiled with OpenMP GPU offloading, aborting.")
