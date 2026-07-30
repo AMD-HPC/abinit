@@ -781,6 +781,7 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
 
  if(use_gemm_nonlop) then
 
+   ABI_NVTX_START_RANGE(NVTX_NONLOP)
    if(hamk%gpu_option==ABI_GPU_DISABLED .or. hamk%gpu_option==ABI_GPU_OPENMP) then
 
      call gemm_nonlop(hamk%atindx1,choice,cpopt,cprjin,dimenl1,dimenl2,dimekbq,&
@@ -810,13 +811,17 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
 
    end if
 
+   ABI_NVTX_END_RANGE()
+
  else
 
 #ifdef HAVE_OPENMP_OFFLOAD
    if(hamk%gpu_option==ABI_GPU_OPENMP) then
+     ABI_NVTX_START_RANGE(NVTX_NONLOP_OMP_UPDATE)
      if(xomp_target_is_present(c_loc(vectin))) then
        !$OMP TARGET UPDATE FROM(vectin)
      end if
+     ABI_NVTX_END_RANGE()
    end if
 #endif
 

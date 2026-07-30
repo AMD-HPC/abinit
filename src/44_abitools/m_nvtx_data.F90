@@ -26,7 +26,7 @@ module m_nvtx_data
 
   implicit none
 
-  integer, parameter :: NUMBER_OF_NVTX_REGIONS = 117
+  integer, parameter :: NUMBER_OF_NVTX_REGIONS = 128
   character(len=32), dimension(NUMBER_OF_NVTX_REGIONS) :: nvtx_names
   integer          , dimension(NUMBER_OF_NVTX_REGIONS) :: nvtx_ids
 
@@ -147,6 +147,17 @@ module m_nvtx_data
   integer, parameter :: NVTX_DMFT_RW_SELF = 115
   integer, parameter :: NVTX_DMFT_SAVEOCC = 116
   integer, parameter :: NVTX_TRANSPOSER_MPI_ALL2ALL = 117
+  integer, parameter :: NVTX_GEMM_NONLOP = 118
+  integer, parameter :: NVTX_GEMM_NONLOP_MAP_IN = 119
+  integer, parameter :: NVTX_GEMM_NONLOP_OPERNLA = 120
+  integer, parameter :: NVTX_GEMM_NONLOP_OPERNLC = 121
+  integer, parameter :: NVTX_GEMM_NONLOP_OPERNLB = 122
+  integer, parameter :: NVTX_GEMM_NONLOP_OPERNLD = 123
+  integer, parameter :: NVTX_PREP_PROJS = 124
+  integer, parameter :: NVTX_PREP_DPROJS = 125
+  integer, parameter :: NVTX_REFRESH_PROJS = 126
+  integer, parameter :: NVTX_NONLOP_OMP_UPDATE = 127
+  integer, parameter :: NVTX_GEMM_NONLOP_MAP_OUT = 128
 
 contains
 
@@ -271,7 +282,18 @@ contains
          & "DMFT_SYM_MATLU", &
          & "DMFT_RW_SELF", &
          & "DMFT_SAVEOCC", &
-         & "TRANSPOSER_MPI_ALL2ALL" &
+         & "TRANSPOSER_MPI_ALL2ALL", &
+         & "GEMM_NONLOP", &
+         & "GEMM_NL_MAP_IN", &
+         & "GEMM_NL_OPERNLA", &
+         & "GEMM_NL_OPERNLC", &
+         & "GEMM_NL_OPERNLB", &
+         & "GEMM_NL_OPERNLD", &
+         & "PREP_PROJS", &
+         & "PREP_DPROJS", &
+         & "REFRESH_PROJS", &
+         & "NONLOP_OMP_UPDATE", &
+         & "GEMM_NL_MAP_OUT" &
          & ]
 
     nvtx_ids(1) = NVTX_MAIN_COMPUTATION
@@ -391,6 +413,17 @@ contains
     nvtx_ids(115)=NVTX_DMFT_RW_SELF
     nvtx_ids(116)=NVTX_DMFT_SAVEOCC
     nvtx_ids(117)=NVTX_TRANSPOSER_MPI_ALL2ALL
+    nvtx_ids(118)=NVTX_GEMM_NONLOP
+    nvtx_ids(119)=NVTX_GEMM_NONLOP_MAP_IN
+    nvtx_ids(120)=NVTX_GEMM_NONLOP_OPERNLA
+    nvtx_ids(121)=NVTX_GEMM_NONLOP_OPERNLC
+    nvtx_ids(122)=NVTX_GEMM_NONLOP_OPERNLB
+    nvtx_ids(123)=NVTX_GEMM_NONLOP_OPERNLD
+    nvtx_ids(124)=NVTX_PREP_PROJS
+    nvtx_ids(125)=NVTX_PREP_DPROJS
+    nvtx_ids(126)=NVTX_REFRESH_PROJS
+    nvtx_ids(127)=NVTX_NONLOP_OMP_UPDATE
+    nvtx_ids(128)=NVTX_GEMM_NONLOP_MAP_OUT
 
   end subroutine nvtx_init
 

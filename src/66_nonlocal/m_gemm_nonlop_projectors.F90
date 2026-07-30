@@ -31,6 +31,8 @@
 
 #include "abi_common.h"
 
+#include "nvtx_macros.h"
+
 module m_gemm_nonlop_projectors
 
  use defs_basis
@@ -40,6 +42,10 @@ module m_gemm_nonlop_projectors
  use m_xmpi
  use m_fstrings,    only : itoa, ftoa, sjoin
  use m_abi_linalg
+
+#if defined(HAVE_GPU_MARKERS)
+ use m_nvtx_data
+#endif
 
  use defs_abitypes, only : MPI_type
  use m_kg, only : mkkpg
@@ -600,6 +606,8 @@ contains
   ! (amdflang leaves stale stack descriptor entries that collide with later maps).
 #endif
 
+  ABI_NVTX_START_RANGE(NVTX_REFRESH_PROJS)
+
   ik=1; if(is_kprime) ik=2
   if(gemm_nonlop_kpt(ik)%ikpt/=gemm_nonlop_ikpt_this_proc_being_treated &
   &   .or. npw/=gemm_nonlop_kpt(ik)%npw .or. nprojs/=gemm_nonlop_kpt(ik)%nprojs) then
@@ -741,6 +749,9 @@ contains
 
 #endif
   end if
+
+  ABI_NVTX_END_RANGE()
+
  end subroutine refresh_projectors
 !!***
 
@@ -779,6 +790,8 @@ contains
   real(dp), ABI_CONTIGUOUS pointer ::   projs(:,:,:)
   real(dp), ABI_CONTIGUOUS pointer :: projs_r(:,:,:)
   real(dp), ABI_CONTIGUOUS pointer :: projs_i(:,:,:)
+
+  ABI_NVTX_START_RANGE(NVTX_PREP_PROJS)
 
   ik=1; if(is_kprime) ik=2
   if(istwf_k <= 1) then
@@ -1002,6 +1015,8 @@ contains
   !$OMP TARGET EXIT DATA MAP(delete:ph3d) IF(gpu_option==ABI_GPU_OPENMP .and. map_ph3d)
 #endif
 
+  ABI_NVTX_END_RANGE()
+
  end subroutine prep_projectors
 !!***
 
@@ -1046,6 +1061,8 @@ contains
   real(dp), ABI_CONTIGUOUS pointer :: projs_r(:,:,:),dprojs_r(:,:,:)
   real(dp), ABI_CONTIGUOUS pointer :: projs_i(:,:,:),dprojs_i(:,:,:)
 
+
+  ABI_NVTX_START_RANGE(NVTX_PREP_DPROJS)
 
   ik=1; if(is_kprime) ik=2
   if(istwf_k <= 1) then
@@ -1674,6 +1691,8 @@ contains
   !$OMP TARGET EXIT DATA MAP(delete:ffnl) IF(gpu_option==ABI_GPU_OPENMP .and. map_ffnl)
   !$OMP TARGET EXIT DATA MAP(delete:ph3d) IF(gpu_option==ABI_GPU_OPENMP .and. map_ph3d)
 #endif
+
+  ABI_NVTX_END_RANGE()
 
  end subroutine prep_dprojectors
 !!***

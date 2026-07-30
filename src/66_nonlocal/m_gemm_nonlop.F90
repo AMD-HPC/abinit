@@ -31,6 +31,8 @@
 
 #include "abi_common.h"
 
+#include "nvtx_macros.h"
+
 module m_gemm_nonlop
 
  use defs_basis
@@ -40,6 +42,10 @@ module m_gemm_nonlop
  use m_xomp
  use m_abi_linalg
  use m_gemm_nonlop_projectors
+
+#if defined(HAVE_GPU_MARKERS)
+ use m_nvtx_data
+#endif
 
  use defs_abitypes, only : MPI_type
  use m_opernlc_ylm, only : opernlc_ylm
@@ -285,6 +291,8 @@ contains
     end if
   end if
 
+  ABI_NVTX_START_RANGE(NVTX_GEMM_NONLOP)
+
   transfer_vectin=.false.; transfer_vectout=.false.; transfer_svectout=.false.
   if(gpu_option==ABI_GPU_OPENMP) then
     ! Check if provided buffers are already mapped on GPU
@@ -419,6 +427,7 @@ contains
     end if
     if(signs == 1) then
       enlout=zero
+      ABI_NVTX_END_RANGE()
       return
     end if
     if(signs == 2) then
@@ -447,6 +456,7 @@ contains
         end if
 #endif
       end if
+      ABI_NVTX_END_RANGE()
       return
     end if
   end if
@@ -478,6 +488,7 @@ contains
   end if
 
 #ifdef HAVE_OPENMP_OFFLOAD
+  ABI_NVTX_START_RANGE(NVTX_GEMM_NONLOP_MAP_IN)
   !$OMP TARGET ENTER DATA MAP(to:kpgin_)  if(nkpgin_  > 0 .and. gpu_option==ABI_GPU_OPENMP)
   !$OMP TARGET ENTER DATA MAP(to:kpgout_) if(nkpgout_ > 0 .and. gpu_option==ABI_GPU_OPENMP)
 
@@ -490,6 +501,7 @@ contains
   if(size(enl_)>0) then
     !$OMP TARGET ENTER DATA MAP(to:enl_) IF(gpu_option==ABI_GPU_OPENMP)
   end if
+  ABI_NVTX_END_RANGE()
 #endif
 
   !FIXME These seemingly useless pointers are used in BLAS operations for
@@ -761,6 +773,7 @@ contains
 
   if(cpopt<=1.or.(cpopt<=3.and.(choice==2.or.choice==3.or.choice==5.or.choice==51.or.choice==23.or.choice==54.or.choice==55.or.choice==4))) then
 
+    ABI_NVTX_START_RANGE(NVTX_GEMM_NONLOP_OPERNLA)
     call opernla_gemm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnlin,&
     &       d2projections,dprojections,ffnlin,projections,&
     &       idir,indlmn,istwf_k,kpgin_,matblk,mpi_enreg,nd2gxdt,ndgxdt,nkpgin_,&
@@ -808,12 +821,14 @@ contains
         end do
       end if
     end if ! cpopt >= 0
+    ABI_NVTX_END_RANGE()
   end if ! cpopt >= 2
 
   if(choice > 0) then
 
     if(choice /= 7) then
       ! opernlc
+      ABI_NVTX_START_RANGE(NVTX_GEMM_NONLOP_OPERNLC)
       iatm = 0
       shift = 0; dshift = 0; dfshift = 0; d2shift = 0
       do itypat=1, ntypat_
@@ -859,10 +874,12 @@ contains
         call gpu_copy(s_projections, projections, int(cplex,c_size_t) * nprojs * nspinor * ndat)
       end if
     end if ! choice /= 7
+    ABI_NVTX_END_RANGE()
 
     ! opernlb
     if(signs==2) then
 
+      ABI_NVTX_START_RANGE(NVTX_GEMM_NONLOP_OPERNLB)
       call opernlb_gemm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_fac,&
       &       d2gxdt_dum_in,d2gxdt_dum_out,&
       &       vnl_dprojections,s_dprojections,dimffnlout,ffnlout,&
@@ -876,10 +893,12 @@ contains
       &       vectin_,vectout_,svectout_,&
       &       temp_realvec_r,temp_realvec_i,&
       &       gpu_option,gemm_nonlop_is_distributed)
+      ABI_NVTX_END_RANGE()
     end if
 
     ! opernld
     if(signs==1) then
+      ABI_NVTX_START_RANGE(NVTX_GEMM_NONLOP_OPERNLD)
       nld_on_gpu = .false.
       if(choice==1 .or. choice==2 .or. choice==3 .or. choice==23 .or. choice==4 .or. choice==54 .or. choice==55 .or. choice==6) then
         if(gpu_option==ABI_GPU_OPENMP) nld_on_gpu = .true.
@@ -1132,12 +1151,14 @@ contains
         ABI_FREE(work3)
       end if
 
+      ABI_NVTX_END_RANGE()
     end if !opernld
 
   end if ! choice>0
 
 #ifdef HAVE_OPENMP_OFFLOAD
   if(gpu_option==ABI_GPU_OPENMP) then
+    ABI_NVTX_START_RANGE(NVTX_GEMM_NONLOP_MAP_OUT)
     ! Retrieve and release allocated buffers
     !$OMP TARGET EXIT DATA MAP(delete:vectin) IF(transfer_vectin)
     !$OMP TARGET EXIT DATA MAP(from:vectout)   IF(transfer_vectout)
@@ -1171,6 +1192,7 @@ contains
 
     !$OMP TARGET EXIT DATA MAP(delete:enlk,fnlk,strnlk,ddkk,enlout) IF(signs == 1 .and. choice > 0)
     !$OMP TARGET EXIT DATA MAP(delete:atindx1,indlmn)
+    ABI_NVTX_END_RANGE()
   end if
 #endif
 
@@ -1238,6 +1260,8 @@ contains
     ABI_FREE(temp_realvec_r)
     ABI_FREE(temp_realvec_i)
   end if
+
+  ABI_NVTX_END_RANGE()
 
  end subroutine gemm_nonlop
 !***
