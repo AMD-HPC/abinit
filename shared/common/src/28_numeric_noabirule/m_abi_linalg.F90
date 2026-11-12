@@ -390,8 +390,16 @@ module m_abi_linalg
 
   end interface
 
-#else
- !dummy routines replace gpu helper routines
+#endif
+ ! These must be public regardless of HAVE_GPU: when defined, the real
+ ! bind(c) interfaces above provide them; when not, the dummy routines in
+ ! abi_gpu_linalg.f90 do. Previously this public list was only reached in
+ ! the !HAVE_GPU branch, so in HAVE_GPU builds these silently defaulted to
+ ! private -- harmless for calls from within this module (host association
+ ! doesn't need PUBLIC), but it broke external callers like
+ ! m_lobpcgwf_old.F90, which a stricter Flang now correctly flags as
+ ! calling an implicit (non-BIND(C)) external that conflicts with the
+ ! BIND(C) interface of the same name.
  public :: gpu_device_synchronize
  public :: check_gpu_mem
  public :: alloc_on_gpu
@@ -409,7 +417,6 @@ module m_abi_linalg
  public :: gpu_xscal
  public :: gpu_xsygvd
  public :: gpu_xsygvd_bufferSize
-#endif
 
  public :: copy_gpu_to_gpu
  public :: gpu_memset
