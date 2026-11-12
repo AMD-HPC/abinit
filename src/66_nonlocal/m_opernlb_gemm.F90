@@ -35,7 +35,7 @@ module m_opernlb_gemm
 #endif
 
 #ifdef HAVE_FC_ISO_C_BINDING
- use, intrinsic :: iso_c_binding, only : c_ptr,c_loc,c_size_t
+ use, intrinsic :: iso_c_binding, only : c_ptr,c_loc,c_size_t,c_f_pointer
 #endif
 
  implicit none

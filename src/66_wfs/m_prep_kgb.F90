@@ -27,6 +27,7 @@ module m_prep_kgb
  use m_errors
  use m_xmpi
  use m_abi_linalg
+ use, intrinsic :: iso_c_binding
 
  use defs_abitypes, only : MPI_type
  use m_time,        only : timab
