@@ -1483,6 +1483,9 @@ subroutine solve_inner_ompgpu(invovl, ham, cplx, mpi_enreg, proj, ndat, sm1proj,
 #ifdef HAVE_GPU_HIP
  type(c_ptr) :: sm1proj_amdcopy,PtPsm1proj_amdcopy
 #endif
+#if defined HAVE_GPU_HIP && defined FC_LLVM
+ real(dp), ABI_CONTIGUOUS pointer :: sm1proj_amdref(:,:,:), PtPsm1proj_amdref(:,:,:)
+#endif
 
 ! *************************************************************************
 
