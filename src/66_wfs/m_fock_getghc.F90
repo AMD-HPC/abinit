@@ -1866,8 +1866,8 @@ subroutine fock_ACE_getghc(cwavef,ghc,gs_ham,mpi_enreg,ndat,gpu_option)
  type(MPI_type),intent(in) :: mpi_enreg
  type(gs_hamiltonian_type),target,intent(inout) :: gs_ham
 ! Arrays
- real(dp),intent(inout) :: cwavef(:,:)!,ghc(2,gs_ham%npw_k*ndat)
- real(dp),intent(inout) :: ghc(:,:)
+ real(dp),intent(inout),target :: cwavef(:,:)!,ghc(2,gs_ham%npw_k*ndat)
+ real(dp),intent(inout),target :: ghc(:,:)
 
 !Local variables-------------------------------
 ! Scalars
@@ -1877,7 +1877,8 @@ subroutine fock_ACE_getghc(cwavef,ghc,gs_ham,mpi_enreg,ndat,gpu_option)
  type(fock_common_type),pointer :: fockcommon
 ! Arrays
  real(dp) :: tsec(2)
- real(dp), allocatable :: mat(:,:,:),ghc1(:,:),vdotr(:),vdoti(:)
+ real(dp), allocatable :: vdotr(:),vdoti(:)
+ real(dp), allocatable, target :: mat(:,:,:),ghc1(:,:)
  real(dp), ABI_CONTIGUOUS pointer :: xi(:,:,:)
 
 ! *************************************************************************

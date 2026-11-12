@@ -671,9 +671,9 @@ subroutine prep_nonlop(choice,cpopt,cwaveprj,enlout_block,hamk,idir,lambdablock,
  integer(kind=C_SIZE_T) :: gvnlc_alltoall2_size
  integer(kind=C_SIZE_T) :: gsc_alltoall2_size
 #else
- real(dp), allocatable :: cwavef_alltoall2(:,:)
+ real(dp), allocatable, target :: cwavef_alltoall2(:,:)
  real(dp), allocatable :: gvnlc_alltoall2(:,:)
- real(dp), allocatable :: gsc_alltoall2(:,:)
+ real(dp), allocatable, target :: gsc_alltoall2(:,:)
 #endif
 
  real(dp), allocatable :: cwavef_alltoall1(:,:)

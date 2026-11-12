@@ -106,7 +106,7 @@ module m_chebfiwf
 #if defined HAVE_GPU && defined HAVE_YAKL
  real(kind=c_double), ABI_CONTIGUOUS pointer, save :: pcon(:)
 #else
- real(dp),            allocatable,            save :: pcon(:)
+ real(dp),            allocatable,target,     save :: pcon(:)
 #endif
 
  type(mpi_type),pointer,save :: l_mpi_enreg

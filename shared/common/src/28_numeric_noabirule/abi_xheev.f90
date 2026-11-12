@@ -36,8 +36,8 @@
  character(len=1), intent(in) :: jobz
  character(len=1), intent(in) :: uplo
  integer, intent(in) :: n,lda
- real(dp), intent(inout) :: a(n,*)  ! FIXME should be cplex * lda
- real(dp), intent(out) :: w(n)
+ real(dp), intent(inout), target :: a(n,*)  ! FIXME should be cplex * lda
+ real(dp), intent(out), target :: w(n)
  integer, optional, intent(in) :: istwf_k
  integer, optional, intent(in) :: x_cplx
  integer, optional, intent(in) :: timopt,tim_xeigen
@@ -149,8 +149,8 @@ subroutine abi_cheev(jobz,uplo,n,a,lda,w)
  character(len=1), intent(in) :: jobz
  character(len=1), intent(in) :: uplo
  integer, intent(in) :: n,lda
- complex(spc), intent(inout) :: a(lda,*)
- real(sp), intent(out) :: w(n)
+ complex(spc), intent(inout), target :: a(lda,*)
+ real(sp), intent(out), target :: w(n)
 
 !Local variables-------------------------------
  integer :: info,lwork

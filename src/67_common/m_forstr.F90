@@ -668,7 +668,7 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
 #if defined HAVE_GPU && defined HAVE_YAKL
  real(c_double), ABI_CONTIGUOUS pointer :: cwavef(:,:) => null()
 #else
- real(dp),allocatable :: cwavef(:,:)
+ real(dp),allocatable,target :: cwavef(:,:)
 #endif
  real(dp),allocatable :: enlout(:),ffnl_sav(:,:,:,:),ffnl_str(:,:,:,:)
  real(dp),allocatable :: ghc_dum(:,:),gprimd(:,:),kpg_k(:,:),kpg_k_sav(:,:)

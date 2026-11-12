@@ -41,8 +41,8 @@
  character(len=1), intent(in) :: jobz
  character(len=1), intent(in) :: uplo
  integer, intent(in) :: n,lda,ldb
- real(dp), intent(inout) :: a(n,*) ! FIXME should be cplex * lda
- real(dp), intent(inout) :: b(n,*)
+ real(dp), intent(inout), target :: a(n,*) ! FIXME should be cplex * lda
+ real(dp), intent(inout), target :: b(n,*)
  real(dp),target,intent(out) :: w(n)
  integer, optional, intent(in) :: x_cplx
  integer, optional, intent(in) :: istwf_k
