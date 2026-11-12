@@ -243,11 +243,11 @@ extern "C" void gpu_xgemm_(int* cplx, char *transA, char *transB, int *N, int *M
                 (double *)(*B_ptr), *ldb,
                 &((*beta).x),
                 (double *)(*C_ptr), *ldc) :
-    hipblasZgemm(hipblas_handle, opA, opB, *N, *M, *K, (hipblasDoubleComplex *) alpha,
-                (hipblasDoubleComplex *)(*A_ptr), *lda,
-                (hipblasDoubleComplex *)(*B_ptr), *ldb,
-                (hipblasDoubleComplex *) beta,
-                (hipblasDoubleComplex *)(*C_ptr), *ldc);
+    hipblasZgemm(hipblas_handle, opA, opB, *N, *M, *K, (hipDoubleComplex *) alpha,
+                (hipDoubleComplex *)(*A_ptr), *lda,
+                (hipDoubleComplex *)(*B_ptr), *ldb,
+                (hipDoubleComplex *) beta,
+                (hipDoubleComplex *)(*C_ptr), *ldc);
 
 } // gpu_xgemm
 
@@ -305,11 +305,11 @@ extern "C" void gpu_xgemm_strided_batched_(int* cplx, char *transA, char *transB
                 &((*beta).x),
                 (double *)(*C_ptr), *ldc, *strideC, *batchCount)) :
     HIP_API_CHECK( hipblasZgemmStridedBatched(hipblas_handle, opA, opB,
-                *N, *M, *K, (hipblasDoubleComplex *) alpha,
-                (hipblasDoubleComplex *)(*A_ptr), *lda, *strideA,
-                (hipblasDoubleComplex *)(*B_ptr), *ldb, *strideB,
-                (hipblasDoubleComplex *) beta,
-                (hipblasDoubleComplex *)(*C_ptr), *ldc, *strideC, *batchCount));
+                *N, *M, *K, (hipDoubleComplex *) alpha,
+                (hipDoubleComplex *)(*A_ptr), *lda, *strideA,
+                (hipDoubleComplex *)(*B_ptr), *ldb, *strideB,
+                (hipDoubleComplex *) beta,
+                (hipDoubleComplex *)(*C_ptr), *ldc, *strideC, *batchCount));
 } // gpu_xgemm_strided_batched
 
 /*=========================================================================*/
@@ -363,11 +363,11 @@ extern "C" void gpu_xsymm_(int* cplx, char *side, char *uplo, int *N, int *M,
                 (double *)(*B_ptr), *ldb,
                 &((*beta).x),
                 (double *)(*C_ptr), *ldc)) :
-    HIP_API_CHECK( hipblasZsymm(hipblas_handle, sideMode, fillMode, *N, *M, (hipblasDoubleComplex *) alpha,
-                (hipblasDoubleComplex *)(*A_ptr), *lda,
-                (hipblasDoubleComplex *)(*B_ptr), *ldb,
-                (hipblasDoubleComplex *) beta,
-                (hipblasDoubleComplex *)(*C_ptr), *ldc));
+    HIP_API_CHECK( hipblasZsymm(hipblas_handle, sideMode, fillMode, *N, *M, (hipDoubleComplex *) alpha,
+                (hipDoubleComplex *)(*A_ptr), *lda,
+                (hipDoubleComplex *)(*B_ptr), *ldb,
+                (hipDoubleComplex *) beta,
+                (hipDoubleComplex *)(*C_ptr), *ldc));
 } // gpu_xsymm_omp
 
 /*=========================================================================*/
@@ -415,11 +415,11 @@ extern "C" void gpu_zhemm_(char *side, char *uplo, int *N, int *M,
   hipblasSideMode_t sideMode = select_hipblas_side(side);
   hipblasFillMode_t fillMode = select_hipblas_fill_mode(uplo);
 
-  HIP_API_CHECK( hipblasZhemm(hipblas_handle, sideMode, fillMode, *N, *M, (hipblasDoubleComplex *) alpha,
-              (hipblasDoubleComplex *)(*A_ptr), *lda,
-              (hipblasDoubleComplex *)(*B_ptr), *ldb,
-              (hipblasDoubleComplex *) beta,
-              (hipblasDoubleComplex *)(*C_ptr), *ldc));
+  HIP_API_CHECK( hipblasZhemm(hipblas_handle, sideMode, fillMode, *N, *M, (hipDoubleComplex *) alpha,
+              (hipDoubleComplex *)(*A_ptr), *lda,
+              (hipDoubleComplex *)(*B_ptr), *ldb,
+              (hipDoubleComplex *) beta,
+              (hipDoubleComplex *)(*C_ptr), *ldc));
 } // gpu_zhemm_omp
 
 /*=========================================================================*/
@@ -486,9 +486,9 @@ extern "C" void gpu_xtrsm_(int* cplx, char *side, char *uplo, char *transA, char
                 (double *)(*A_ptr), *ldA,
                 (double *)(*B_ptr), *ldB):
     hipblasZtrsm(hipblas_handle, sideMode, fillMode, opA, diagType,
-                *N, *M, (hipblasDoubleComplex *) alpha,
-                (hipblasDoubleComplex *)(*A_ptr), *ldA,
-                (hipblasDoubleComplex *)(*B_ptr), *ldB);
+                *N, *M, (hipDoubleComplex *) alpha,
+                (hipDoubleComplex *)(*A_ptr), *ldA,
+                (hipDoubleComplex *)(*B_ptr), *ldB);
 } // gpu_xtrsm_
 
 /*=========================================================================*/
@@ -521,9 +521,9 @@ extern "C" void gpu_xaxpy_(int* cplx, int *N,
                               (double *)(*X_ptr), *incrx,
                               (double *)(*Y_ptr), *incry) :
                   hipblasZaxpy(hipblas_handle, *N,
-                              (hipblasDoubleComplex *) alpha,
-                              (hipblasDoubleComplex *)(*X_ptr), *incrx,
-                              (hipblasDoubleComplex *)(*Y_ptr), *incry) );
+                              (hipDoubleComplex *) alpha,
+                              (hipDoubleComplex *)(*X_ptr), *incrx,
+                              (hipDoubleComplex *)(*Y_ptr), *incry) );
 } // gpu_xaxpy_
 
 /*=========================================================================*/
@@ -554,8 +554,8 @@ extern "C" void gpu_xcopy_(int* cplx, int *N,
                               (const double *)(*X_ptr), *incrx,
                               (      double *)(*Y_ptr), *incry) :
                   hipblasZcopy(hipblas_handle, *N,
-                              (const hipblasDoubleComplex *)(*X_ptr), *incrx,
-                              (      hipblasDoubleComplex *)(*Y_ptr), *incry) );
+                              (const hipDoubleComplex *)(*X_ptr), *incrx,
+                              (      hipDoubleComplex *)(*Y_ptr), *incry) );
 } // gpu_xcopy_
 
 /*=========================================================================*/
@@ -586,8 +586,8 @@ extern "C" void gpu_xscal_(int* cplx, int *N,
                               &((*alpha).x),
                               (double *)(*X_ptr), *incrx) :
                   hipblasZscal(hipblas_handle, *N,
-                              (hipblasDoubleComplex *) alpha,
-                              (hipblasDoubleComplex *)(*X_ptr), *incrx) );
+                              (hipDoubleComplex *) alpha,
+                              (hipDoubleComplex *)(*X_ptr), *incrx) );
 } // gpu_xscal_
 
 /*=========================================================================*/
