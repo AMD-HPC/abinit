@@ -130,7 +130,7 @@ subroutine opernlb_gemm_distributed(rank,nprocs,npwout,ndat,nspinor,&
 #else
 
      ! GPU-aware MPI available : pass GPU buffers to MPI
-     !$OMP TARGET DATA USE_DEVICE_PTR(work_buf,recv_buf)
+     !$OMP TARGET DATA USE_DEVICE_ADDR(work_buf,recv_buf)
      call c_f_pointer(c_loc(work_buf), work_buf_f, [cplex*npwout*nprojs_last_blk])
      call c_f_pointer(c_loc(recv_buf), recv_buf_f, [cplex*npwout*nprojs_last_blk])
      call MPI_ISEND(work_buf_f,cplex*npwout*nprojs_cur_blk,MPI_DOUBLE_PRECISION,&
@@ -162,7 +162,7 @@ subroutine opernlb_gemm_distributed(rank,nprocs,npwout,ndat,nspinor,&
      end if
    else if(gpu_option == ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
-     !$OMP TARGET DATA USE_DEVICE_PTR(work_buf,vectout,projections)
+     !$OMP TARGET DATA USE_DEVICE_ADDR(work_buf,vectout,projections)
      call abi_gpu_xgemm(cplex, 'N','N', &
      &                  npwout, ndat*nspinor, nprojs_cur_blk, cone, &
      &                  c_loc(work_buf), npwout, &
@@ -191,7 +191,7 @@ subroutine opernlb_gemm_distributed(rank,nprocs,npwout,ndat,nspinor,&
      call DCOPY(cplex*npwout*nprojs_cur_blk, recv_buf, 1, work_buf, 1)
    else if(gpu_option == ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
-     !$OMP TARGET DATA USE_DEVICE_PTR(work_buf,recv_buf)
+     !$OMP TARGET DATA USE_DEVICE_ADDR(work_buf,recv_buf)
      call copy_gpu_to_gpu(c_loc(work_buf), c_loc(recv_buf), INT(cplex, c_size_t)*npwout*nprojs_last_blk*dp)
      !$OMP END TARGET DATA
 #endif
@@ -233,7 +233,7 @@ subroutine opernl_xgemm(cplx,transa,transb,m,n,k,alpha,a,lda,b,ldb,beta,c,ldc,&
    end if
  else if (gpu_option == ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
-   !$OMP TARGET DATA USE_DEVICE_PTR(a,b,c)
+   !$OMP TARGET DATA USE_DEVICE_ADDR(a,b,c)
    call abi_gpu_xgemm(cplx,transa,transb,m,n,k,alpha,&
    &    c_loc(a),lda,c_loc(b),ldb,beta,c_loc(c),ldc)
    !$OMP END TARGET DATA
@@ -584,7 +584,7 @@ subroutine opernlb_gemm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_fac,&
        svectout = svectout + vectin ! TODO understand this
      else if(gpu_option == ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
-       !$OMP TARGET DATA USE_DEVICE_PTR(vectin,svectout)
+       !$OMP TARGET DATA USE_DEVICE_ADDR(vectin,svectout)
        call abi_gpu_xaxpy(1, 2*npw*nspinor*ndat, cone, &
        &    c_loc(vectin), 1, c_loc(svectout), 1)
        !$OMP END TARGET DATA
