@@ -1472,8 +1472,9 @@ subroutine solve_inner_ompgpu(invovl, ham, cplx, mpi_enreg, proj, ndat, sm1proj,
 
  integer :: array_nlmntot_pp(mpi_enreg%nproc_fft)
  integer :: nlmntot_this_proc, ibeg, iend, ierr, i, nprojs
- real(dp) :: resid(cplx, invovl%nprojs,ndat), precondresid(cplx, invovl%nprojs,ndat)
- real(dp) :: normprojs(ndat), errs(ndat), maxerr, previous_maxerr
+ real(dp), allocatable :: resid(:,:,:), precondresid(:,:,:)
+ real(dp), allocatable :: normprojs(:), errs(:)
+ real(dp) :: maxerr, previous_maxerr
  character(len=500) :: message
 
  real(dp), parameter :: precision = 1e-16 ! maximum relative error. TODO: use tolwfr ?
@@ -1498,6 +1499,11 @@ subroutine solve_inner_ompgpu(invovl, ham, cplx, mpi_enreg, proj, ndat, sm1proj,
  sm1proj_amdref => sm1proj
  PtPsm1proj_amdref => PtPsm1proj
 #endif
+
+ ABI_MALLOC(resid, (cplx, invovl%nprojs, ndat))
+ ABI_MALLOC(precondresid, (cplx, invovl%nprojs, ndat))
+ ABI_MALLOC(normprojs, (ndat))
+ ABI_MALLOC(errs, (ndat))
 
  !$OMP TARGET ENTER DATA MAP(alloc:errs,precondresid,resid,normprojs)
 
@@ -1618,6 +1624,11 @@ subroutine solve_inner_ompgpu(invovl, ham, cplx, mpi_enreg, proj, ndat, sm1proj,
    end do
  end do
  !$OMP TARGET EXIT DATA MAP(delete:errs,resid,precondresid,normprojs)
+
+ ABI_FREE(resid)
+ ABI_FREE(precondresid)
+ ABI_FREE(normprojs)
+ ABI_FREE(errs)
 
  if(maxerr >= precision .and. maxerr >= 1e-10) then
    write(message, *) 'In invovl, max error was', maxerr, ' after 30 iterations'
